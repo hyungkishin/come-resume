@@ -18,7 +18,10 @@ export async function POST(request: NextRequest) {
   const overall = randomScore(70, 90);
 
   const polished = text
-    .replace(/했습니다\./g, '했습니다.')
+    .replace(/담당했습니다/g, '주도적으로 리드하여 팀 생산성 향상에 기여했습니다')
+    .replace(/만들었습니다/g, '구축하여 서비스 안정성과 확장성을 확보했습니다')
+    .replace(/개발했습니다/g, '설계·개발하여 핵심 비즈니스 지표 개선에 기여했습니다')
+    .replace(/했습니다\.?$/gm, '하여 성과를 달성했습니다.')
     .replace(/\s{2,}/g, ' ')
     .trim();
 

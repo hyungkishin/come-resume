@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     status: 'deployed',
     portfolioId,
-    url: 'hyungki.foliofy.dev',
+    url: 'https://hyungki.foliofy.dev',
     deployedAt: new Date().toISOString(),
   });
 }

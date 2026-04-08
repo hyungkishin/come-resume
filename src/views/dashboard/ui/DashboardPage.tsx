@@ -147,13 +147,13 @@ export function DashboardPage() {
                   <span>마지막 수정 {new Date(p.updatedAt).toLocaleDateString('ko-KR')}</span>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <Link href="/editor">
+                  <Link href={`/editor?id=${p.id}`}>
                     <Button variant="secondary" size="sm" className="gap-1.5">
                       <Settings className="h-3.5 w-3.5" />
                       편집
                     </Button>
                   </Link>
-                  <Link href="/editor">
+                  <Link href={`/editor?id=${p.id}`}>
                     <Button variant="ghost" size="sm" className="gap-1.5">
                       <Eye className="h-3.5 w-3.5" />
                       미리보기

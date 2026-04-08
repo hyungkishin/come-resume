@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
@@ -247,6 +247,13 @@ export function EditorPage() {
   const [deployState, setDeployState] = useState<'idle' | 'deploying' | 'deployed'>('idle');
   const [isSaved, setIsSaved] = useState(false);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem('foliofy-editor-sections', JSON.stringify(sections));
+      localStorage.setItem('foliofy-editor-theme', JSON.stringify(theme));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [sections, theme]);
 
   const handleSave = useCallback(() => {
     localStorage.setItem('foliofy-editor-sections', JSON.stringify(sections));
