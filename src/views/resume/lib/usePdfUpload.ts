@@ -19,9 +19,11 @@ export function usePdfUpload(onTextExtracted: (text: string) => void): UsePdfUpl
     if (!file || file.type !== 'application/pdf') return;
     setIsPdfLoading(true);
     try {
-      const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
-      const pdfjsWorker = await import('pdfjs-dist/legacy/build/pdf.worker.mjs');
-      pdfjsLib.GlobalWorkerOptions.workerPort = new pdfjsWorker.default();
+      const pdfjsLib = await import('pdfjs-dist');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+        'pdfjs-dist/build/pdf.worker.min.mjs',
+        import.meta.url
+      ).toString();
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
       const pages: string[] = [];

@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { useToastStore } from '@/shared/ui/toast/Toast';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
 import { Tabs } from '@/shared/ui/tabs/Tabs';
@@ -9,16 +8,9 @@ import { Badge } from '@/shared/ui/badge/Badge';
 import { Card } from '@/shared/ui/card/Card';
 import { cn } from '@/shared/lib/cn';
 import { Sparkles, Copy, Check, FileText, ArrowRight, BarChart3 } from '@/shared/ui/icons';
-import type { ResumeScore, ResumeSuggestion } from '@/shared/types';
-import { generatePolishedText, calculateScore, generateSuggestions, matchJd } from '@/features/resume-polish/lib/polish-engine';
+import { usePdfUpload } from '../lib/usePdfUpload';
+import { useResumePolish } from '../lib/useResumePolish';
 import { ResumeExport } from './ResumeExport';
-
-interface JdMatchResult {
-  matchScore: number;
-  missingKeywords: string[];
-  matchedKeywords: string[];
-  suggestions: string[];
-}
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -47,96 +39,21 @@ export function ResumePage() {
   const [activeTab, setActiveTab] = useState('input');
   const [text, setText] = useState('');
   const [jdText, setJdText] = useState('');
-  const [isPolishing, setIsPolishing] = useState(false);
-  const [isMatching, setIsMatching] = useState(false);
-  const [result, setResult] = useState<{ polished: string; score: ResumeScore; suggestions: ResumeSuggestion[] } | null>(null);
-  const [matchResult, setMatchResult] = useState<JdMatchResult | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
   const [language, setLanguage] = useState<'ko' | 'en'>('ko');
-  const [isPdfLoading, setIsPdfLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const addToast = useToastStore((state) => state.addToast);
 
-  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || file.type !== 'application/pdf') return;
-    setIsPdfLoading(true);
-    try {
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-        'pdfjs-dist/build/pdf.worker.min.mjs',
-        import.meta.url
-      ).toString();
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-      const pages: string[] = [];
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        const lines: string[] = [];
-        let lastY: number | null = null;
-        for (const item of content.items) {
-          if (!('str' in item)) continue;
-          const y = 'transform' in item ? (item.transform as number[])[5] : 0;
-          if (lastY !== null && Math.abs(y - lastY) > 2) {
-            lines.push('\n');
-          }
-          lines.push(item.str);
-          lastY = y;
-        }
-        pages.push(lines.join(''));
-      }
-      setText(pages.join('\n\n'));
-      addToast('success', `PDF에서 ${pdf.numPages}페이지 텍스트를 추출했습니다`);
-    } catch {
-      // Fallback: FileReader로 텍스트 추출 시도
-      try {
-        const text = await file.text();
-        if (text.trim().length > 50) {
-          setText(text);
-          addToast('info', 'PDF에서 텍스트를 추출했습니다 (기본 모드)');
-        } else {
-          addToast('error', '이 PDF에서 텍스트를 추출할 수 없습니다. 텍스트를 직접 붙여넣어 주세요.');
-        }
-      } catch {
-        addToast('error', 'PDF 파일을 읽을 수 없습니다. 텍스트를 직접 붙여넣어 주세요.');
-      }
-    } finally {
-      setIsPdfLoading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
-
-  const handlePolish = async () => {
-    if (!text.trim()) return;
-    setIsPolishing(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setResult({
-      polished: generatePolishedText(text),
-      score: calculateScore(text),
-      suggestions: generateSuggestions(text),
-    });
-    setIsPolishing(false);
-    setActiveTab('result');
-  };
-
-  const handleMatch = async () => {
-    if (!jdText.trim() || !text.trim()) return;
-    setIsMatching(true);
-    setMatchResult(null);
-    await new Promise(r => setTimeout(r, 1500));
-    setMatchResult(matchJd(text, jdText));
-    setIsMatching(false);
-  };
-
-  const handleCopy = () => {
-    if (result) {
-      navigator.clipboard.writeText(result.polished);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
+  const { isPdfLoading, fileInputRef, handlePdfUpload } = usePdfUpload(setText);
+  const {
+    isPolishing,
+    result,
+    handlePolish,
+    isMatching,
+    matchResult,
+    handleMatch,
+    copied,
+    handleCopy,
+    exportOpen,
+    setExportOpen,
+  } = useResumePolish();
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
@@ -207,7 +124,7 @@ export function ResumePage() {
               <FileText className="mr-1.5 h-3.5 w-3.5" />
               {isPdfLoading ? 'PDF 읽는 중...' : 'PDF 업로드'}
             </Button>
-            <Button size="md" onClick={handlePolish} isLoading={isPolishing} disabled={!text.trim()} className="gap-2">
+            <Button size="md" onClick={() => handlePolish(text, () => setActiveTab('result'))} isLoading={isPolishing} disabled={!text.trim()} className="gap-2">
               <Sparkles className="h-4 w-4" />
               AI 폴리싱 시작
               <ArrowRight className="h-4 w-4" />
@@ -312,7 +229,7 @@ export function ResumePage() {
               className="min-h-[200px] w-full bg-transparent px-4 py-4 text-sm leading-relaxed text-zinc-100 placeholder:text-zinc-600 focus:outline-none resize-none"
             />
           </Card>
-          <Button size="md" onClick={handleMatch} isLoading={isMatching} disabled={!jdText.trim() || !text.trim()} className="gap-2">
+          <Button size="md" onClick={() => handleMatch(text, jdText)} isLoading={isMatching} disabled={!jdText.trim() || !text.trim()} className="gap-2">
             <BarChart3 className="h-4 w-4" />
             매칭 분석
           </Button>

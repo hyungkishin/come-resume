@@ -37,11 +37,160 @@ export function polishLine(line: string): string {
   return prefix + result;
 }
 
+interface ParsedSection {
+  title: string;
+  content: string[];
+}
+
+const SECTION_KEYWORDS: Record<string, string[]> = {
+  '자기소개': ['자기소개', '소개', 'about', 'summary', 'introduction', '자기 소개'],
+  '경력': ['경력', '경험', 'experience', 'work', '직무', '이력', '근무', '회사', '재직', '정규직', '계약직'],
+  '프로젝트': ['프로젝트', 'project', '사이드', '토이', '포트폴리오'],
+  '기술 스택': ['기술', 'skill', 'tech', 'stack', '스택', '사용 기술', '보유 기술', '역량'],
+  '학력': ['학력', 'education', '대학', '학교', '졸업', '학과', '학사', '석사', '박사'],
+  '자격증': ['자격', 'certification', '수료', '이수', '자격증', 'license'],
+  '활동': ['활동', '수상', 'award', '봉사', '커뮤니티', '기여', '오픈소스'],
+};
+
+function detectSection(line: string): string | null {
+  const lower = line.toLowerCase().replace(/[#\-*_|[\]]/g, '').trim();
+  if (lower.length < 1 || lower.length > 30) return null;
+
+  for (const [section, keywords] of Object.entries(SECTION_KEYWORDS)) {
+    if (keywords.some(kw => lower.includes(kw.toLowerCase()))) {
+      return section;
+    }
+  }
+  return null;
+}
+
+function isCompanyLine(line: string): boolean {
+  return /\d{4}[\.\-\/]/.test(line) || /현재/.test(line) || /~\s*(현재|present)/i.test(line);
+}
+
+function parseResumeSections(text: string): ParsedSection[] {
+  const lines = text.split('\n');
+  const sections: ParsedSection[] = [];
+  let currentSection: ParsedSection = { title: '자기소개', content: [] };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      if (currentSection.content.length > 0) {
+        currentSection.content.push('');
+      }
+      continue;
+    }
+
+    const detectedSection = detectSection(trimmed);
+    if (detectedSection && currentSection.content.filter(c => c.trim()).length > 0) {
+      sections.push(currentSection);
+      currentSection = { title: detectedSection, content: [] };
+      continue;
+    } else if (detectedSection && currentSection.content.length === 0) {
+      currentSection.title = detectedSection;
+      continue;
+    }
+
+    currentSection.content.push(trimmed);
+  }
+
+  if (currentSection.content.filter(c => c.trim()).length > 0) {
+    sections.push(currentSection);
+  }
+
+  return sections;
+}
+
+function formatSection(section: ParsedSection): string {
+  const lines: string[] = [`## ${section.title}`, ''];
+
+  for (const line of section.content) {
+    if (!line.trim()) {
+      lines.push('');
+      continue;
+    }
+
+    if (isCompanyLine(line)) {
+      lines.push(`### ${polishLine(line)}`);
+    } else if (line.startsWith('-') || line.startsWith('•') || line.startsWith('·')) {
+      lines.push(polishLine(line));
+    } else if (section.title === '기술 스택') {
+      lines.push(`- ${line}`);
+    } else {
+      const polished = polishLine(line);
+      if (section.title === '경력' || section.title === '프로젝트') {
+        lines.push(`- ${polished}`);
+      } else {
+        lines.push(polished);
+      }
+    }
+  }
+
+  return lines.join('\n');
+}
+
 export function generatePolishedText(original: string): string {
-  return original
-    .split('\n')
-    .map(line => polishLine(line))
-    .join('\n');
+  const trimmed = original.trim();
+  if (!trimmed) return '';
+
+  // 이미 마크다운 구조가 있으면 줄 단위 폴리싱만
+  if (/^##\s/m.test(trimmed)) {
+    return trimmed
+      .split('\n')
+      .map(line => polishLine(line))
+      .join('\n');
+  }
+
+  // 구조 없는 텍스트 → 섹션 파싱 후 템플릿 포맷으로 재구성
+  const sections = parseResumeSections(trimmed);
+
+  if (sections.length === 0) {
+    return trimmed.split('\n').map(line => polishLine(line)).join('\n');
+  }
+
+  // 섹션이 1개뿐이고 내용이 긴 경우 → 줄 기반으로 섹션 추론
+  if (sections.length === 1 && sections[0].content.length > 5) {
+    const content = sections[0].content;
+    const autoSections: ParsedSection[] = [];
+    let current: ParsedSection = { title: '자기소개', content: [] };
+
+    for (const line of content) {
+      if (!line.trim()) {
+        if (current.content.filter(c => c.trim()).length > 0) {
+          current.content.push('');
+        }
+        continue;
+      }
+
+      if (isCompanyLine(line)) {
+        if (current.content.filter(c => c.trim()).length > 0) {
+          autoSections.push(current);
+        }
+        current = { title: '경력', content: [line] };
+      } else if (/^(React|Vue|Angular|Node|Python|Java|Go|TypeScript|JavaScript|Docker|AWS|Spring|Next)/i.test(line)) {
+        if (current.title !== '기술 스택') {
+          if (current.content.filter(c => c.trim()).length > 0) {
+            autoSections.push(current);
+          }
+          current = { title: '기술 스택', content: [line] };
+        } else {
+          current.content.push(line);
+        }
+      } else {
+        current.content.push(line);
+      }
+    }
+    if (current.content.filter(c => c.trim()).length > 0) {
+      autoSections.push(current);
+    }
+
+    if (autoSections.length > 1) {
+      return autoSections.map(formatSection).join('\n\n');
+    }
+  }
+
+  return sections.map(formatSection).join('\n\n');
 }
 
 export function calculateScore(original: string): ResumeScore {

@@ -7,14 +7,16 @@ import { Button } from '@/shared/ui/button/Button';
 import { Tabs } from '@/shared/ui/tabs/Tabs';
 import { cn } from '@/shared/lib/cn';
 import {
-  Plus, Eye, Grip, Trash2, Zap, FileText, Code2,
+  Plus, Eye, Zap, FileText, Code2,
   Briefcase, GraduationCap, Mail, BarChart3,
-  Rocket, X, Check, ExternalLink,
 } from '@/shared/ui/icons';
 import type { PortfolioSection, SectionType, PortfolioTheme } from '@/shared/types';
-import { Input } from '@/shared/ui/input/Input';
-import { Badge } from '@/shared/ui/badge/Badge';
 import { PortfolioPreview } from './PortfolioPreview';
+import { PreviewSection } from './PreviewSection';
+import { SectionEditor } from './SectionEditor';
+import { EditorSidebar } from './EditorSidebar';
+import { SectionPalette } from './SectionPalette';
+import { DEFAULT_SECTIONS, DEFAULT_THEME, TEMPLATE_THEMES } from './editorConstants';
 
 const SECTION_META: Record<SectionType, { label: string; icon: React.ReactNode }> = {
   hero: { label: '히어로', icon: <Zap className="h-4 w-4" /> },
@@ -26,195 +28,6 @@ const SECTION_META: Record<SectionType, { label: string; icon: React.ReactNode }
   contact: { label: '연락처', icon: <Mail className="h-4 w-4" /> },
   custom: { label: '커스텀', icon: <Plus className="h-4 w-4" /> },
 };
-
-const DEFAULT_SECTIONS: PortfolioSection[] = [
-  { id: '1', type: 'hero', order: 0, data: { name: '홍길동', title: 'Frontend Developer', subtitle: '사용자 중심의 인터페이스를 설계하고, 성능과 접근성을 모두 챙기는 3년차 프론트엔드 개발자입니다.', avatarUrl: null }, isVisible: true },
-  { id: '2', type: 'about', order: 1, data: { bio: 'React와 TypeScript를 주력으로 사용하며, 디자인 시스템 구축과 성능 최적화에 강점이 있습니다. B2B SaaS 대시보드와 이커머스 플랫폼을 개발한 경험이 있으며, 사용자 경험을 최우선으로 생각합니다. 최근에는 Next.js App Router와 서버 컴포넌트에 깊은 관심을 가지고 있습니다.' }, isVisible: true },
-  { id: '3', type: 'projects', order: 2, data: { items: [
-    { title: 'Foliofy', description: 'GitHub 연동 AI 포트폴리오 빌더. 5분 만에 프로페셔널한 포트폴리오 생성.', technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Supabase'], githubUrl: 'https://github.com/user/foliofy' },
-    { title: 'Dashboard Pro', description: 'B2B SaaS 대시보드. 실시간 데이터 시각화와 팀 협업 기능 제공.', technologies: ['React', 'D3.js', 'PostgreSQL', 'WebSocket'], githubUrl: 'https://github.com/user/dashboard-pro' },
-    { title: 'EcoMarket', description: '친환경 이커머스 플랫폼. 일 주문량 500건 처리, 페이지 로딩 40% 개선.', technologies: ['Next.js', 'Stripe', 'Prisma', 'Redis'], githubUrl: 'https://github.com/user/ecomarket' },
-  ] }, isVisible: true },
-  { id: '4', type: 'skills', order: 3, data: { categories: [
-    { name: 'Frontend', skills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Framer Motion'] },
-    { name: 'Backend', skills: ['Node.js', 'PostgreSQL', 'Redis', 'Prisma'] },
-    { name: 'DevOps', skills: ['Docker', 'GitHub Actions', 'Vercel', 'AWS'] },
-    { name: 'Tools', skills: ['Figma', 'Git', 'Jira', 'Notion'] },
-  ] }, isVisible: true },
-  { id: '5', type: 'experience', order: 4, data: { items: [
-    { company: '테크스타트업 A', role: 'Senior Frontend Developer', period: '2024.01 - 현재', description: 'React/TypeScript 기반 B2B SaaS 대시보드 설계·개발. 디자인 시스템 구축으로 개발 생산성 30% 향상.' },
-    { company: '프리랜서', role: 'Fullstack Developer', period: '2022.06 - 2023.12', description: 'Next.js 기반 이커머스 플랫폼 구축. Stripe 결제 연동 및 주문 관리 시스템 개발.' },
-  ] }, isVisible: true },
-  { id: '7', type: 'education', order: 5, data: { items: [{ school: '한국대학교', degree: '컴퓨터공학과 학사', period: '2018.03 - 2022.02', description: '학점 3.9/4.5 · 소프트웨어 공학 캡스톤 우수상' }] }, isVisible: true },
-  { id: '6', type: 'contact', order: 6, data: { email: 'gildong@example.com', github: 'gildong-dev', linkedin: 'gildong', website: 'https://gildong.dev' }, isVisible: true },
-];
-
-const DEFAULT_THEME: PortfolioTheme = {
-  templateId: 'minimal-dark',
-  primaryColor: '#3b82f6',
-  fontFamily: 'Geist Sans',
-  darkMode: true,
-  customCSS: null,
-};
-
-const TEMPLATE_THEMES: Record<string, Partial<PortfolioTheme>> = {
-  'minimal-dark': { primaryColor: '#3b82f6', darkMode: true },
-  'developer-pro': { primaryColor: '#22d3ee', darkMode: true },
-  'creative-gradient': { primaryColor: '#7c3aed', darkMode: true },
-  'clean-white': { primaryColor: '#3b82f6', darkMode: false },
-  'neon-nights': { primaryColor: '#a855f7', darkMode: true },
-  'corporate': { primaryColor: '#0ea5e9', darkMode: true },
-  'portfolio-plus': { primaryColor: '#f97316', darkMode: true },
-  'modern-stack': { primaryColor: '#10b981', darkMode: true },
-  'elegant': { primaryColor: '#d97706', darkMode: true },
-  'starter': { primaryColor: '#6366f1', darkMode: true },
-};
-
-function PreviewSection({ section }: { section: PortfolioSection }) {
-  if (!section.isVisible) return null;
-  const data = section.data as Record<string, unknown>;
-
-  if (section.type === 'hero') {
-    return (
-      <div className="flex flex-col items-center rounded-xl bg-gradient-to-b from-zinc-900 to-zinc-950 px-8 py-16 text-center">
-        <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-3xl font-bold text-white">
-          {((data.name as string) || 'U').charAt(0)}
-        </div>
-        <h2 className="text-3xl font-bold tracking-tight text-zinc-50">{(data.name as string) || '이름'}</h2>
-        <p className="mt-2 text-lg font-medium text-blue-400">{(data.title as string) || '직함'}</p>
-        <p className="mt-3 max-w-md text-sm leading-relaxed text-zinc-400">{(data.subtitle as string) || '소개를 입력하세요'}</p>
-      </div>
-    );
-  }
-
-  if (section.type === 'about') {
-    return (
-      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-blue-400">About</h3>
-        <p className="text-sm leading-relaxed text-zinc-300">{(data.bio as string) || '자기소개를 입력하세요'}</p>
-      </div>
-    );
-  }
-
-  if (section.type === 'projects') {
-    const items = (data.items as Array<{ title: string; description: string; technologies: string[]; githubUrl: string }>) || [];
-    return (
-      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
-        <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-blue-400">Projects</h3>
-        {items.length === 0 && <p className="text-sm text-zinc-500">프로젝트를 추가하세요</p>}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {items.map((item, i) => (
-            <div key={i} className="rounded-lg border border-zinc-800 bg-zinc-800/30 p-4">
-              <p className="font-medium text-zinc-100">{item.title}</p>
-              <p className="mt-1 text-xs leading-relaxed text-zinc-400">{item.description}</p>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {(item.technologies || []).map(t => (
-                  <span key={t} className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs text-blue-400">{t}</span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (section.type === 'skills') {
-    const categories = (data.categories as Array<{ name: string; skills: string[] }>) || [];
-    return (
-      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
-        <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-blue-400">Skills</h3>
-        <div className="grid grid-cols-2 gap-4">
-          {categories.map(cat => (
-            <div key={cat.name}>
-              <p className="mb-2 text-xs font-medium text-zinc-300">{cat.name}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {cat.skills.map(s => (
-                  <span key={s} className="rounded-full border border-zinc-700 bg-zinc-800/50 px-2.5 py-1 text-xs text-zinc-300">{s}</span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (section.type === 'experience') {
-    const items = (data.items as Array<{ company: string; role: string; period: string; description: string }>) || [];
-    return (
-      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
-        <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-blue-400">Experience</h3>
-        <div className="space-y-4">
-          {items.map((item, i) => (
-            <div key={i} className="relative border-l-2 border-zinc-700 pl-4">
-              <div className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-blue-500" />
-              <p className="font-medium text-zinc-100">{item.role}</p>
-              <p className="text-xs text-zinc-400">{item.company} · {item.period}</p>
-              {item.description && <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">{item.description}</p>}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (section.type === 'education') {
-    const items = (data.items as Array<{ school: string; degree: string; period: string; description: string }>) || [];
-    return (
-      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
-        <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-blue-400">Education</h3>
-        <div className="space-y-4">
-          {items.map((item, i) => (
-            <div key={i} className="relative border-l-2 border-zinc-700 pl-4">
-              <div className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-blue-500" />
-              <p className="font-medium text-zinc-100">{item.degree}</p>
-              <p className="text-xs text-zinc-400">{item.school} · {item.period}</p>
-              {item.description && <p className="mt-1.5 text-xs text-zinc-400">{item.description}</p>}
-            </div>
-          ))}
-          {!items.length && <p className="text-sm text-zinc-500">학력을 추가하세요</p>}
-        </div>
-      </div>
-    );
-  }
-
-  if (section.type === 'contact') {
-    return (
-      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8 text-center">
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-blue-400">Contact</h3>
-        <p className="mb-4 text-sm text-zinc-300">함께 일하고 싶으시다면 연락주세요</p>
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {(data.email as string) && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 text-xs text-zinc-300">
-              <Mail className="h-3 w-3" /> {data.email as string}
-            </span>
-          )}
-          {(data.github as string) && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 text-xs text-zinc-300">
-              <Code2 className="h-3 w-3" /> {data.github as string}
-            </span>
-          )}
-          {(data.website as string) && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 text-xs text-zinc-300">
-              <ExternalLink className="h-3 w-3" /> 웹사이트
-            </span>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // custom
-  return (
-    <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
-      <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-blue-400">
-        {(data.title as string) || '커스텀'}
-      </h3>
-      <p className="text-sm leading-relaxed text-zinc-300">{(data.content as string) || '내용을 입력하세요'}</p>
-    </div>
-  );
-}
 
 export function EditorPage() {
   const [sections, setSections] = useState<PortfolioSection[]>(() => {
@@ -262,8 +75,6 @@ export function EditorPage() {
     setTimeout(() => setIsSaved(false), 3000);
   }, [sections, theme]);
 
-  const activeSection = sections.find(s => s.id === activeId);
-
   const toggleVisibility = useCallback((id: string) => {
     setSections(prev => prev.map(s => s.id === id ? { ...s, isVisible: !s.isVisible } : s));
   }, []);
@@ -290,485 +101,46 @@ export function EditorPage() {
     setSections(prev => prev.map(s => s.id === id ? { ...s, data: { ...s.data as Record<string, unknown>, ...newData } } : s));
   }, []);
 
+  const handleDeploy = useCallback(() => {
+    if (deployState === 'deployed') {
+      setDeployState('idle');
+    } else {
+      setDeployState('deploying');
+      setTimeout(() => setDeployState('deployed'), 2000);
+    }
+  }, [deployState]);
+
+  const activeSection = sections.find(s => s.id === activeId);
+
   return (
     <div className="flex h-[calc(100vh-64px)]">
-      {/* 좌측 사이드바 */}
-      <div className="flex w-72 flex-col border-r border-zinc-800 bg-zinc-900/50">
-        <div className="border-b border-zinc-800 p-4">
-          <h2 className="text-sm font-semibold text-zinc-100">포트폴리오 편집</h2>
-        </div>
-        <div className="p-3">
-          <Tabs
-            tabs={[
-              { id: 'sections', label: '섹션' },
-              { id: 'style', label: '스타일' },
-              { id: 'settings', label: '설정' },
-            ]}
-            activeTab={sideTab}
-            onTabChange={setSideTab}
-          />
-        </div>
+      <EditorSidebar
+        sections={sections}
+        activeId={activeId}
+        sideTab={sideTab}
+        theme={theme}
+        deployState={deployState}
+        isSaved={isSaved}
+        sectionMeta={SECTION_META}
+        onTabChange={setSideTab}
+        onSelectSection={setActiveId}
+        onToggleVisibility={toggleVisibility}
+        onRemoveSection={removeSection}
+        onOpenPalette={() => setPaletteOpen(true)}
+        onThemeChange={(patch) => setTheme(prev => ({ ...prev, ...patch }))}
+        onDeploy={handleDeploy}
+        onSave={handleSave}
+      />
 
-        <div className="flex-1 overflow-y-auto p-3">
-          {sideTab === 'sections' && (
-            <div className="space-y-1">
-              {sections.map(s => {
-                const meta = SECTION_META[s.type];
-                return (
-                  <div
-                    key={s.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setActiveId(s.id)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') setActiveId(s.id); }}
-                    className={cn(
-                      'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors cursor-pointer',
-                      activeId === s.id
-                        ? 'bg-blue-500/10 text-blue-400'
-                        : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
-                    )}
-                  >
-                    <Grip className="h-3.5 w-3.5 cursor-grab text-zinc-600" />
-                    <span className="flex-1">{meta.label}</span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); toggleVisibility(s.id); }}
-                      className={cn('p-0.5', s.isVisible ? 'text-zinc-500' : 'text-zinc-700')}
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); removeSection(s.id); }}
-                      className="p-0.5 text-zinc-600 hover:text-red-400"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                );
-              })}
-              <button
-                onClick={() => setPaletteOpen(true)}
-                className="flex w-full items-center gap-2 rounded-lg border border-dashed border-zinc-700 px-3 py-2 text-sm text-zinc-500 transition-colors hover:border-zinc-500 hover:text-zinc-300"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                섹션 추가
-              </button>
-            </div>
-          )}
+      {activeSection && sideTab === 'sections' && (
+        <SectionEditor
+          section={activeSection}
+          sectionMeta={SECTION_META}
+          onUpdate={updateSectionData}
+          onClose={() => setActiveId(null)}
+        />
+      )}
 
-          {sideTab === 'style' && (
-            <div className="space-y-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-400">메인 컬러</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={theme.primaryColor}
-                    onChange={e => setTheme(prev => ({ ...prev, primaryColor: e.target.value }))}
-                    className="h-8 w-8 cursor-pointer rounded border-0 bg-transparent"
-                  />
-                  <span className="text-xs text-zinc-500">{theme.primaryColor}</span>
-                </div>
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-400">폰트</label>
-                <select
-                  value={theme.fontFamily}
-                  onChange={e => setTheme(prev => ({ ...prev, fontFamily: e.target.value }))}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200"
-                >
-                  <option>Geist Sans</option>
-                  <option>Inter</option>
-                  <option>Pretendard</option>
-                </select>
-              </div>
-            </div>
-          )}
-
-          {sideTab === 'settings' && (
-            <div className="space-y-4">
-              <Input label="슬러그" defaultValue="username" />
-              <div className="rounded-lg bg-zinc-800/50 p-3">
-                <p className="text-xs text-zinc-400">배포 URL</p>
-                {deployState === 'deployed' ? (
-                  <a
-                    href="https://username.foliofy.dev"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1 flex items-center gap-1 text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"
-                  >
-                    username.foliofy.dev
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                ) : (
-                  <p className="mt-1 text-sm font-medium text-zinc-200">username.foliofy.dev</p>
-                )}
-              </div>
-              {deployState === 'deployed' && (
-                <Badge variant="green" className="flex items-center gap-1.5 w-fit">
-                  <Check className="h-3 w-3" />
-                  배포 완료
-                </Badge>
-              )}
-              {deployState === 'deployed' ? (
-                <Button
-                  size="sm"
-                  className="w-full gap-2"
-                  onClick={() => setDeployState('idle')}
-                >
-                  <Rocket className="h-4 w-4" />
-                  다시 배포
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  className="w-full gap-2"
-                  disabled={deployState === 'deploying'}
-                  onClick={() => {
-                    setDeployState('deploying');
-                    setTimeout(() => setDeployState('deployed'), 2000);
-                  }}
-                >
-                  <Rocket className="h-4 w-4" />
-                  {deployState === 'deploying' ? '배포 중...' : '배포하기'}
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="border-t border-zinc-800 p-3">
-          <Button variant="primary" size="sm" className="w-full" onClick={handleSave}>
-            {isSaved ? '저장됨 ✓' : '저장'}
-          </Button>
-        </div>
-      </div>
-
-      {/* 중앙 편집 영역 */}
-      {activeSection && sideTab === 'sections' ? (
-        <div className="w-80 border-r border-zinc-800 bg-zinc-900/30 overflow-y-auto">
-          <div className="flex items-center justify-between border-b border-zinc-800 p-4">
-            <h3 className="text-sm font-semibold text-zinc-100">
-              {SECTION_META[activeSection.type].label} 편집
-            </h3>
-            <button onClick={() => setActiveId(null)} className="text-zinc-500 hover:text-zinc-300">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-          <div className="space-y-4 p-4">
-            {activeSection.type === 'hero' && (
-              <>
-                <Input label="이름" value={(activeSection.data as Record<string, string>).name || ''} onChange={e => updateSectionData(activeSection.id, { name: e.target.value })} />
-                <Input label="직함" value={(activeSection.data as Record<string, string>).title || ''} onChange={e => updateSectionData(activeSection.id, { title: e.target.value })} />
-                <Input label="한줄 소개" value={(activeSection.data as Record<string, string>).subtitle || ''} onChange={e => updateSectionData(activeSection.id, { subtitle: e.target.value })} />
-              </>
-            )}
-            {activeSection.type === 'about' && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-zinc-300">자기소개</label>
-                <textarea
-                  className="min-h-[120px] w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={(activeSection.data as Record<string, string>).bio || ''}
-                  onChange={e => updateSectionData(activeSection.id, { bio: e.target.value })}
-                />
-              </div>
-            )}
-            {activeSection.type === 'contact' && (
-              <>
-                <Input label="이메일" value={(activeSection.data as Record<string, string>).email || ''} onChange={e => updateSectionData(activeSection.id, { email: e.target.value })} />
-                <Input label="GitHub" value={(activeSection.data as Record<string, string>).github || ''} onChange={e => updateSectionData(activeSection.id, { github: e.target.value })} />
-                <Input label="LinkedIn" value={(activeSection.data as Record<string, string>).linkedin || ''} onChange={e => updateSectionData(activeSection.id, { linkedin: e.target.value })} />
-                <Input label="웹사이트" value={(activeSection.data as Record<string, string>).website || ''} onChange={e => updateSectionData(activeSection.id, { website: e.target.value })} />
-              </>
-            )}
-            {activeSection.type === 'skills' && (() => {
-              const skillData = activeSection.data as { categories?: Array<{ name: string; skills: string[] }> };
-              const categories = skillData.categories ?? [];
-              return (
-                <div className="space-y-4">
-                  {categories.map((cat, ci) => (
-                    <div key={ci} className="rounded-lg border border-zinc-800 p-3 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <input
-                          className="flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="카테고리명"
-                          value={cat.name}
-                          onChange={e => {
-                            const next = categories.map((c, i) => i === ci ? { ...c, name: e.target.value } : c);
-                            updateSectionData(activeSection.id, { categories: next });
-                          }}
-                        />
-                        <button
-                          onClick={() => {
-                            const next = categories.filter((_, i) => i !== ci);
-                            updateSectionData(activeSection.id, { categories: next });
-                          }}
-                          className="text-zinc-600 hover:text-red-400"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {cat.skills.map((skill, si) => (
-                          <span key={si} className="flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-1 text-xs text-blue-400">
-                            {skill}
-                            <button
-                              onClick={() => {
-                                const next = categories.map((c, i) => i === ci ? { ...c, skills: c.skills.filter((_, j) => j !== si) } : c);
-                                updateSectionData(activeSection.id, { categories: next });
-                              }}
-                              className="hover:text-red-400"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                      <input
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="스킬 입력 후 Enter"
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') {
-                            const val = (e.target as HTMLInputElement).value.trim();
-                            if (!val) return;
-                            const next = categories.map((c, i) => i === ci ? { ...c, skills: [...c.skills, val] } : c);
-                            updateSectionData(activeSection.id, { categories: next });
-                            (e.target as HTMLInputElement).value = '';
-                          }
-                        }}
-                      />
-                    </div>
-                  ))}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="w-full gap-2"
-                    onClick={() => updateSectionData(activeSection.id, { categories: [...categories, { name: '', skills: [] }] })}
-                  >
-                    <Plus className="h-4 w-4" />
-                    카테고리 추가
-                  </Button>
-                </div>
-              );
-            })()}
-            {activeSection.type === 'experience' && (() => {
-              const expData = activeSection.data as { items?: Array<{ company: string; role: string; period: string; description: string }> };
-              const items = expData.items ?? [];
-              return (
-                <div className="space-y-4">
-                  {items.map((item, idx) => (
-                    <div key={idx} className="rounded-lg border border-zinc-800 p-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-zinc-400">경력 {idx + 1}</span>
-                        <button
-                          onClick={() => {
-                            const next = items.filter((_, i) => i !== idx);
-                            updateSectionData(activeSection.id, { items: next });
-                          }}
-                          className="text-zinc-600 hover:text-red-400"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <Input label="회사명" value={item.company} onChange={e => {
-                        const next = items.map((it, i) => i === idx ? { ...it, company: e.target.value } : it);
-                        updateSectionData(activeSection.id, { items: next });
-                      }} />
-                      <Input label="직함" value={item.role} onChange={e => {
-                        const next = items.map((it, i) => i === idx ? { ...it, role: e.target.value } : it);
-                        updateSectionData(activeSection.id, { items: next });
-                      }} />
-                      <Input label="기간" value={item.period} placeholder="예: 2024.01 - 현재" onChange={e => {
-                        const next = items.map((it, i) => i === idx ? { ...it, period: e.target.value } : it);
-                        updateSectionData(activeSection.id, { items: next });
-                      }} />
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium text-zinc-300">설명</label>
-                        <textarea
-                          className="min-h-[80px] w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={item.description}
-                          onChange={e => {
-                            const next = items.map((it, i) => i === idx ? { ...it, description: e.target.value } : it);
-                            updateSectionData(activeSection.id, { items: next });
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="w-full gap-2"
-                    onClick={() => updateSectionData(activeSection.id, { items: [...items, { company: '', role: '', period: '', description: '' }] })}
-                  >
-                    <Plus className="h-4 w-4" />
-                    경력 추가
-                  </Button>
-                </div>
-              );
-            })()}
-            {activeSection.type === 'education' && (() => {
-              const eduData = activeSection.data as { items?: Array<{ school: string; degree: string; period: string; description: string }> };
-              const items = eduData.items ?? [];
-              return (
-                <div className="space-y-4">
-                  {items.map((item, idx) => (
-                    <div key={idx} className="rounded-lg border border-zinc-800 p-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-zinc-400">학력 {idx + 1}</span>
-                        <button
-                          onClick={() => {
-                            const next = items.filter((_, i) => i !== idx);
-                            updateSectionData(activeSection.id, { items: next });
-                          }}
-                          className="text-zinc-600 hover:text-red-400"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <Input label="학교명" value={item.school} onChange={e => {
-                        const next = items.map((it, i) => i === idx ? { ...it, school: e.target.value } : it);
-                        updateSectionData(activeSection.id, { items: next });
-                      }} />
-                      <Input label="학과/전공" value={item.degree} onChange={e => {
-                        const next = items.map((it, i) => i === idx ? { ...it, degree: e.target.value } : it);
-                        updateSectionData(activeSection.id, { items: next });
-                      }} />
-                      <Input label="기간" value={item.period} placeholder="예: 2018.03 - 2022.02" onChange={e => {
-                        const next = items.map((it, i) => i === idx ? { ...it, period: e.target.value } : it);
-                        updateSectionData(activeSection.id, { items: next });
-                      }} />
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium text-zinc-300">설명</label>
-                        <textarea
-                          className="min-h-[80px] w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={item.description}
-                          onChange={e => {
-                            const next = items.map((it, i) => i === idx ? { ...it, description: e.target.value } : it);
-                            updateSectionData(activeSection.id, { items: next });
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="w-full gap-2"
-                    onClick={() => updateSectionData(activeSection.id, { items: [...items, { school: '', degree: '', period: '', description: '' }] })}
-                  >
-                    <Plus className="h-4 w-4" />
-                    학력 추가
-                  </Button>
-                </div>
-              );
-            })()}
-            {activeSection.type === 'projects' && (() => {
-              const projData = activeSection.data as { items?: Array<{ title: string; description: string; technologies: string[]; githubUrl: string }> };
-              const items = projData.items ?? [];
-              return (
-                <div className="space-y-4">
-                  {items.map((item, idx) => (
-                    <div key={idx} className="rounded-lg border border-zinc-800 p-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-zinc-400">프로젝트 {idx + 1}</span>
-                        <button
-                          onClick={() => {
-                            const next = items.filter((_, i) => i !== idx);
-                            updateSectionData(activeSection.id, { items: next });
-                          }}
-                          className="text-zinc-600 hover:text-red-400"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <Input label="프로젝트명" value={item.title} onChange={e => {
-                        const next = items.map((it, i) => i === idx ? { ...it, title: e.target.value } : it);
-                        updateSectionData(activeSection.id, { items: next });
-                      }} />
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium text-zinc-300">설명</label>
-                        <textarea
-                          className="min-h-[80px] w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={item.description}
-                          onChange={e => {
-                            const next = items.map((it, i) => i === idx ? { ...it, description: e.target.value } : it);
-                            updateSectionData(activeSection.id, { items: next });
-                          }}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium text-zinc-300">기술 스택</label>
-                        <div className="flex flex-wrap gap-1.5 mb-1">
-                          {(item.technologies || []).map((tech, ti) => (
-                            <span key={ti} className="flex items-center gap-1 rounded-full bg-zinc-700/50 px-2.5 py-1 text-xs text-zinc-300">
-                              {tech}
-                              <button
-                                onClick={() => {
-                                  const next = items.map((it, i) => i === idx ? { ...it, technologies: it.technologies.filter((_, j) => j !== ti) } : it);
-                                  updateSectionData(activeSection.id, { items: next });
-                                }}
-                                className="hover:text-red-400"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                        <input
-                          className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="기술 입력 후 Enter"
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') {
-                              const val = (e.target as HTMLInputElement).value.trim();
-                              if (!val) return;
-                              const next = items.map((it, i) => i === idx ? { ...it, technologies: [...(it.technologies || []), val] } : it);
-                              updateSectionData(activeSection.id, { items: next });
-                              (e.target as HTMLInputElement).value = '';
-                            }
-                          }}
-                        />
-                      </div>
-                      <Input label="GitHub URL" value={item.githubUrl} placeholder="https://github.com/..." onChange={e => {
-                        const next = items.map((it, i) => i === idx ? { ...it, githubUrl: e.target.value } : it);
-                        updateSectionData(activeSection.id, { items: next });
-                      }} />
-                    </div>
-                  ))}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="w-full gap-2"
-                    onClick={() => updateSectionData(activeSection.id, { items: [...items, { title: '', description: '', technologies: [], githubUrl: '' }] })}
-                  >
-                    <Plus className="h-4 w-4" />
-                    프로젝트 추가
-                  </Button>
-                </div>
-              );
-            })()}
-            {activeSection.type === 'custom' && (
-              <>
-                <Input
-                  label="제목"
-                  value={(activeSection.data as Record<string, string>).title || ''}
-                  onChange={e => updateSectionData(activeSection.id, { title: e.target.value })}
-                />
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-zinc-300">내용</label>
-                  <textarea
-                    className="min-h-[120px] w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={(activeSection.data as Record<string, string>).content || ''}
-                    onChange={e => updateSectionData(activeSection.id, { content: e.target.value })}
-                    placeholder="내용을 입력하세요"
-                  />
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      ) : null}
-
-      {/* 미리보기 */}
       <div className="flex-1 overflow-y-auto bg-zinc-950 p-8">
         <div className="mb-4 flex items-center justify-between">
           <Tabs
@@ -800,32 +172,12 @@ export function EditorPage() {
         </div>
       </div>
 
-      {/* 섹션 추가 팔레트 */}
       {paletteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setPaletteOpen(false)}>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-6"
-            onClick={e => e.stopPropagation()}
-          >
-            <h3 className="mb-4 text-lg font-semibold text-zinc-50">섹션 추가</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {(Object.entries(SECTION_META) as [SectionType, { label: string; icon: React.ReactNode }][]).map(([type, meta]) => (
-                <button
-                  key={type}
-                  onClick={() => addSection(type)}
-                  className="flex items-center gap-3 rounded-xl border border-zinc-800 p-3 text-left transition-colors hover:border-zinc-600 hover:bg-zinc-800"
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800 text-zinc-400">
-                    {meta.icon}
-                  </div>
-                  <span className="text-sm font-medium text-zinc-200">{meta.label}</span>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        </div>
+        <SectionPalette
+          sectionMeta={SECTION_META}
+          onAdd={addSection}
+          onClose={() => setPaletteOpen(false)}
+        />
       )}
 
       <PortfolioPreview

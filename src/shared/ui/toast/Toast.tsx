@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, X, Sparkles } from '@/shared/ui/icons';
+import { CheckCircle2, XCircle, AlertTriangle, Sparkles, X } from '@/shared/ui/icons';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -39,9 +39,9 @@ const toastStyles: Record<ToastType, string> = {
 
 function ToastIcon({ type }: { type: ToastType }) {
   const cls = 'h-4 w-4 shrink-0';
-  if (type === 'success') return <Check className={cls} />;
-  if (type === 'error') return <X className={cls} />;
-  if (type === 'info') return <Sparkles className={cls} />;
+  if (type === 'success') return <CheckCircle2 className={cls} />;
+  if (type === 'error') return <XCircle className={cls} />;
+  if (type === 'warning') return <AlertTriangle className={cls} />;
   return <Sparkles className={cls} />;
 }
 
@@ -49,7 +49,11 @@ export function ToastContainer() {
   const { toasts, removeToast } = useToastStore();
 
   return (
-    <div className="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none">
+    <div
+      className="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none"
+      aria-live="polite"
+      role="status"
+    >
       <AnimatePresence>
         {toasts.map((toast) => (
           <motion.div
