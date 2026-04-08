@@ -17,62 +17,154 @@ interface JdMatchResult {
   suggestions: string[];
 }
 
-const DEMO_POLISHED = `## 경력
 
-### 프론트엔드 개발자 | 스타트업 A (2024.01 - 현재)
-- React/TypeScript 기반 B2B SaaS 대시보드를 설계·개발하여 사용자 전환율 23% 향상
-- Webpack → Vite 마이그레이션으로 빌드 시간 65% 단축 (120초 → 42초)
-- 디자인 시스템 구축 및 20+ 재사용 컴포넌트 개발, 개발 생산성 30% 개선
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash;
+}
 
-### 풀스택 개발자 | 프리랜서 (2022.06 - 2023.12)
-- Next.js 기반 이커머스 플랫폼 구축, 일 주문량 500건 처리
-- PostgreSQL 쿼리 최적화로 API 응답 시간 40% 개선
-- Stripe 결제 연동 및 주문 관리 시스템 개발
+function polishLine(line: string): string {
+  const trimmed = line.trim();
 
-## 기술 스택
-Frontend: React, TypeScript, Next.js, Tailwind CSS, Framer Motion
-Backend: Node.js, Express, PostgreSQL, Redis
-DevOps: Docker, GitHub Actions, Vercel, AWS (S3, CloudFront)`;
+  if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('##')) return line;
+
+  const bullet = trimmed.startsWith('-') || trimmed.startsWith('•');
+  const content = bullet ? trimmed.slice(1).trim() : trimmed;
+  const prefix = bullet ? '- ' : '';
+
+  const transformations: [RegExp, string][] = [
+    [/프론트엔드.*개발.*담당/, 'React/TypeScript 기반 프론트엔드 아키텍처를 설계하고 핵심 기능을 개발하여 사용자 경험 개선에 기여'],
+    [/백엔드.*개발.*담당/, 'Node.js/Express 기반 RESTful API를 설계·구현하여 일 평균 10,000+ 요청을 안정적으로 처리'],
+    [/웹.*개발/, '웹 애플리케이션 전체 개발 라이프사이클을 주도하여 프로젝트를 성공적으로 런칭'],
+    [/유지.*보수/, '레거시 코드 리팩토링 및 테스트 커버리지 60% → 85% 향상으로 배포 안정성 확보'],
+    [/개발했습니다/, '설계·개발하여 핵심 비즈니스 지표 개선에 기여했습니다'],
+    [/담당했습니다/, '주도적으로 리드하여 팀 생산성 향상에 기여했습니다'],
+    [/만들었습니다/, '구축하여 서비스 안정성과 확장성을 확보했습니다'],
+    [/했습니다$/, '하여 측정 가능한 성과를 달성했습니다'],
+    [/참여/, '핵심 역할을 수행'],
+    [/다양한.*경험/, '폭넓은 기술 스택을 활용한 실무 경험'],
+    [/열정적/, '목표 지향적이며 성과 중심의'],
+    [/노력/, '체계적인 접근과 지속적 개선을 통해'],
+    [/잘합니다/, '에 대한 깊은 이해와 실전 경험을 보유하고 있습니다'],
+    [/관심이 많습니다/, '에 대한 실무 경험을 바탕으로 지속적으로 역량을 확장하고 있습니다'],
+  ];
+
+  let result = content;
+  for (const [pattern, replacement] of transformations) {
+    if (pattern.test(result)) {
+      result = result.replace(pattern, replacement);
+      break;
+    }
+  }
+
+  if (bullet && !/\d/.test(result) && result.length > 10) {
+    if (!result.includes('%') && !result.includes('건') && !result.includes('명')) {
+      const metrics = [
+        ' (처리 속도 30% 개선)',
+        ' (개발 기간 2주 단축)',
+        ' (사용자 만족도 15% 향상)',
+        ' (코드 품질 점수 20% 향상)',
+        ' (월 활성 사용자 1,000명 달성)',
+      ];
+      const idx = Math.abs(hashString(result)) % metrics.length;
+      result = result + metrics[idx];
+    }
+  }
+
+  return prefix + result;
+}
 
 function generatePolishedText(original: string): string {
+  return original
+    .split('\n')
+    .map(line => polishLine(line))
+    .join('\n');
+}
+
+function calculateScore(original: string): ResumeScore {
   const lines = original.split('\n').filter(l => l.trim());
-  if (lines.length >= 5) {
-    return original
-      .split('\n')
-      .map(line => {
-        const trimmed = line.trim();
-        if (!trimmed) return line;
-        if (trimmed.startsWith('#') || trimmed.startsWith('-')) return line;
-        if (trimmed.length < 20) return `${line} (구체적 성과 수치 포함)`;
-        return line
-          .replace(/담당했습니다/g, '주도적으로 설계·개발했습니다')
-          .replace(/만들었습니다/g, '구축하여 성과를 달성했습니다')
-          .replace(/했습니다/g, '하여 기여했습니다')
-          .replace(/개발자입니다/g, '전문 개발자입니다');
-      })
-      .join('\n');
+  const hasNumbers = /\d+%|\d+건|\d+명/.test(original);
+  const hasBullets = original.includes('-') || original.includes('•');
+  const hasHeaders = /^#+\s/m.test(original) || /^##/m.test(original);
+  const length = original.length;
+
+  return {
+    overall: Math.min(95, 55 + (hasNumbers ? 10 : 0) + (hasBullets ? 8 : 0) + (hasHeaders ? 7 : 0) + Math.min(20, Math.floor(length / 50))),
+    impact: hasNumbers ? 78 : 58,
+    clarity: hasBullets ? 82 : 65,
+    keywords: Math.min(85, 50 + lines.length * 3),
+    formatting: hasHeaders ? 88 : (hasBullets ? 75 : 55),
+  };
+}
+
+function generateSuggestions(original: string): ResumeSuggestion[] {
+  const suggestions: ResumeSuggestion[] = [];
+  const hasNumbers = /\d+%|\d+건|\d+명/.test(original);
+  const hasBullets = original.includes('-') || original.includes('•');
+  const hasHeaders = /^#+\s/m.test(original) || /^##/m.test(original);
+  const isShort = original.trim().length < 200;
+
+  if (!hasNumbers) {
+    suggestions.push({
+      section: '성과',
+      original: '구체적인 수치가 없는 경력 설명',
+      improved: 'React 기반 대시보드를 개발하여 페이지 로딩 속도 40% 개선, 사용자 이탈률 15% 감소',
+      reason: '구체적 성과 수치를 추가하세요 (%, 건수, 명, 기간 등)',
+      priority: 'high',
+    });
   }
-  return DEMO_POLISHED;
+
+  if (!hasBullets) {
+    suggestions.push({
+      section: '구조',
+      original: '단락 형태로 서술된 경력',
+      improved: '- 주요 기능 개발 및 아키텍처 설계\n- 성능 최적화로 응답 시간 30% 단축\n- 팀 코드 리뷰 문화 도입',
+      reason: '불릿 포인트로 구조화하면 채용 담당자가 빠르게 파악할 수 있습니다',
+      priority: 'high',
+    });
+  }
+
+  if (!hasHeaders) {
+    suggestions.push({
+      section: '포맷',
+      original: '섹션 구분 없이 작성된 이력서',
+      improved: '## 경력\n### 회사명 | 직책 (기간)\n\n## 프로젝트\n## 기술 스택',
+      reason: '섹션을 명확히 구분하세요 (경력, 프로젝트, 기술 스택, 교육)',
+      priority: 'medium',
+    });
+  }
+
+  if (isShort) {
+    suggestions.push({
+      section: '내용',
+      original: '내용이 부족한 이력서',
+      improved: '각 경력 항목에 담당 업무, 사용 기술, 측정 가능한 성과를 3-5개 항목으로 작성하세요',
+      reason: '각 경력에 3-5개의 성과를 추가하세요',
+      priority: 'medium',
+    });
+  }
+
+  if (suggestions.length === 0) {
+    suggestions.push({
+      section: '전반',
+      original: '현재 이력서',
+      improved: 'STAR 포맷(상황-과제-행동-결과)을 적용하면 더욱 설득력 있는 이력서가 됩니다',
+      reason: 'STAR 포맷으로 각 경험을 재구성하면 면접관에게 강한 인상을 남길 수 있습니다',
+      priority: 'low',
+    });
+  }
+
+  return suggestions;
 }
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
 };
-
-const MOCK_SCORE: ResumeScore = {
-  overall: 78,
-  impact: 72,
-  clarity: 85,
-  keywords: 68,
-  formatting: 88,
-};
-
-const MOCK_SUGGESTIONS: ResumeSuggestion[] = [
-  { section: '경력', original: '프론트엔드 개발을 담당했습니다', improved: 'React/TypeScript 기반 대시보드를 설계·개발하여 사용자 전환율 23% 향상', reason: '구체적인 기술과 성과 수치를 포함하세요', priority: 'high' },
-  { section: '프로젝트', original: '쇼핑몰 사이트를 만들었습니다', improved: 'Next.js 기반 이커머스 플랫폼 구축, 일 주문량 500건 처리 및 페이지 로딩 속도 40% 개선', reason: 'STAR 포맷으로 상황-행동-결과를 명시하세요', priority: 'high' },
-  { section: '자기소개', original: '열정적인 개발자입니다', improved: '3년간 B2B SaaS 제품의 프론트엔드를 리드하며, 디자인 시스템 구축과 성능 최적화에 주력해온 개발자입니다', reason: '추상적 표현보다 구체적 경험을 서술하세요', priority: 'medium' },
-];
 
 function ScoreBar({ label, score }: { label: string; score: number }) {
   const color = score >= 80 ? 'bg-emerald-500' : score >= 60 ? 'bg-amber-500' : 'bg-red-500';
@@ -109,8 +201,8 @@ export function ResumePage() {
     await new Promise(r => setTimeout(r, 1500));
     setResult({
       polished: generatePolishedText(text),
-      score: MOCK_SCORE,
-      suggestions: MOCK_SUGGESTIONS,
+      score: calculateScore(text),
+      suggestions: generateSuggestions(text),
     });
     setIsPolishing(false);
     setActiveTab('result');
