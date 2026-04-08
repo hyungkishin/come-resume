@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
 import { Badge } from '@/shared/ui/badge/Badge';
@@ -67,14 +68,18 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
         >
-          <Button size="lg" className="group gap-2 text-base">
-            <Github className="h-5 w-5" />
-            GitHub로 무료 시작
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </Button>
-          <Button variant="outline" size="lg" className="text-base">
-            데모 보기
-          </Button>
+          <Link href="/dashboard">
+            <Button size="lg" className="group gap-2 text-base">
+              <Github className="h-5 w-5" />
+              GitHub로 무료 시작
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </Button>
+          </Link>
+          <Link href="/editor">
+            <Button variant="outline" size="lg" className="text-base">
+              데모 보기
+            </Button>
+          </Link>
         </motion.div>
 
         <motion.p

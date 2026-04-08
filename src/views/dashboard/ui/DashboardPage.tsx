@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
 import { Card } from '@/shared/ui/card/Card';
@@ -59,10 +61,12 @@ export function DashboardPage() {
             <h1 className="text-2xl font-bold text-zinc-50">대시보드</h1>
             <p className="mt-1 text-sm text-zinc-400">포트폴리오와 이력서를 관리하세요</p>
           </div>
-          <Button size="md" className="gap-2">
-            <Plus className="h-4 w-4" />
-            새 포트폴리오
-          </Button>
+          <Link href="/editor">
+            <Button size="md" className="gap-2">
+              <Plus className="h-4 w-4" />
+              새 포트폴리오
+            </Button>
+          </Link>
         </div>
       </motion.div>
 
@@ -96,55 +100,67 @@ export function DashboardPage() {
                 <span>마지막 수정 {new Date(p.updatedAt).toLocaleDateString('ko-KR')}</span>
               </div>
               <div className="mt-4 flex gap-2">
-                <Button variant="secondary" size="sm" className="gap-1.5">
-                  <Settings className="h-3.5 w-3.5" />
-                  편집
-                </Button>
-                <Button variant="ghost" size="sm" className="gap-1.5">
-                  <Eye className="h-3.5 w-3.5" />
-                  미리보기
-                </Button>
+                <Link href="/editor">
+                  <Button variant="secondary" size="sm" className="gap-1.5">
+                    <Settings className="h-3.5 w-3.5" />
+                    편집
+                  </Button>
+                </Link>
+                <Link href="/editor">
+                  <Button variant="ghost" size="sm" className="gap-1.5">
+                    <Eye className="h-3.5 w-3.5" />
+                    미리보기
+                  </Button>
+                </Link>
               </div>
             </Card>
           ))}
 
-          <Card
-            hover
-            className="flex cursor-pointer flex-col items-center justify-center border-dashed py-12 text-zinc-500 transition-colors hover:text-zinc-300"
-          >
-            <Plus className="mb-2 h-8 w-8" />
-            <span className="text-sm font-medium">새 포트폴리오 만들기</span>
-          </Card>
+          <Link href="/editor">
+            <Card
+              hover
+              className="flex cursor-pointer flex-col items-center justify-center border-dashed py-12 text-zinc-500 transition-colors hover:text-zinc-300"
+            >
+              <Plus className="mb-2 h-8 w-8" />
+              <span className="text-sm font-medium">새 포트폴리오 만들기</span>
+            </Card>
+          </Link>
         </div>
       </motion.div>
 
       <motion.div {...fadeUp} transition={{ duration: 0.4, delay: 0.3 }} className="mt-10">
         <h2 className="mb-4 text-lg font-semibold text-zinc-100">빠른 작업</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card hover className="group cursor-pointer">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <h3 className="font-medium text-zinc-100">AI 이력서 폴리싱</h3>
-            <p className="mt-1 text-sm text-zinc-400">이력서를 AI로 다듬어보세요</p>
-            <ArrowRight className="mt-3 h-4 w-4 text-zinc-500 transition-transform group-hover:translate-x-1" />
-          </Card>
-          <Card hover className="group cursor-pointer">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
-              <FileText className="h-5 w-5" />
-            </div>
-            <h3 className="font-medium text-zinc-100">PDF 이력서 생성</h3>
-            <p className="mt-1 text-sm text-zinc-400">ATS 호환 PDF로 내보내기</p>
-            <ArrowRight className="mt-3 h-4 w-4 text-zinc-500 transition-transform group-hover:translate-x-1" />
-          </Card>
-          <Card hover className="group cursor-pointer">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
-              <Globe className="h-5 w-5" />
-            </div>
-            <h3 className="font-medium text-zinc-100">포트폴리오 배포</h3>
-            <p className="mt-1 text-sm text-zinc-400">원클릭으로 배포하기</p>
-            <ArrowRight className="mt-3 h-4 w-4 text-zinc-500 transition-transform group-hover:translate-x-1" />
-          </Card>
+          <Link href="/resume">
+            <Card hover className="group cursor-pointer">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <h3 className="font-medium text-zinc-100">AI 이력서 폴리싱</h3>
+              <p className="mt-1 text-sm text-zinc-400">이력서를 AI로 다듬어보세요</p>
+              <ArrowRight className="mt-3 h-4 w-4 text-zinc-500 transition-transform group-hover:translate-x-1" />
+            </Card>
+          </Link>
+          <Link href="/resume">
+            <Card hover className="group cursor-pointer">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+                <FileText className="h-5 w-5" />
+              </div>
+              <h3 className="font-medium text-zinc-100">PDF 이력서 생성</h3>
+              <p className="mt-1 text-sm text-zinc-400">ATS 호환 PDF로 내보내기</p>
+              <ArrowRight className="mt-3 h-4 w-4 text-zinc-500 transition-transform group-hover:translate-x-1" />
+            </Card>
+          </Link>
+          <Link href="/editor">
+            <Card hover className="group cursor-pointer">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                <Globe className="h-5 w-5" />
+              </div>
+              <h3 className="font-medium text-zinc-100">포트폴리오 배포</h3>
+              <p className="mt-1 text-sm text-zinc-400">원클릭으로 배포하기</p>
+              <ArrowRight className="mt-3 h-4 w-4 text-zinc-500 transition-transform group-hover:translate-x-1" />
+            </Card>
+          </Link>
         </div>
       </motion.div>
     </div>

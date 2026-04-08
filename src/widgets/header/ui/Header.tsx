@@ -51,13 +51,17 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm">
-            로그인
-          </Button>
-          <Button size="sm" className="gap-2">
-            <Github className="h-4 w-4" />
-            GitHub로 시작하기
-          </Button>
+          <Link href="/dashboard">
+            <Button variant="ghost" size="sm">
+              로그인
+            </Button>
+          </Link>
+          <Link href="/dashboard">
+            <Button size="sm" className="gap-2">
+              <Github className="h-4 w-4" />
+              GitHub로 시작하기
+            </Button>
+          </Link>
         </div>
       </div>
     </motion.header>

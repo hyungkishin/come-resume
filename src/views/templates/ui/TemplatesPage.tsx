@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
 import { Tabs } from '@/shared/ui/tabs/Tabs';
@@ -152,7 +153,9 @@ export function TemplatesPage() {
               </span>{' '}
               선택됨
             </span>
-            <Button size="sm">이 템플릿 사용하기</Button>
+            <Link href="/editor">
+              <Button size="sm">이 템플릿 사용하기</Button>
+            </Link>
           </div>
         </motion.div>
       )}

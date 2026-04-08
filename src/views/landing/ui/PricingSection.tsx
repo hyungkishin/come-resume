@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
 import { Badge } from '@/shared/ui/badge/Badge';
@@ -62,13 +63,15 @@ function PricingCard({
         ))}
       </ul>
 
-      <Button
-        variant={highlighted ? 'primary' : 'outline'}
-        size="lg"
-        className="w-full"
-      >
-        {cta}
-      </Button>
+      <Link href="/dashboard">
+        <Button
+          variant={highlighted ? 'primary' : 'outline'}
+          size="lg"
+          className="w-full"
+        >
+          {cta}
+        </Button>
+      </Link>
     </div>
   );
 }
