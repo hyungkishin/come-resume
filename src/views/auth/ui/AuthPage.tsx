@@ -18,10 +18,30 @@ export function AuthPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    if (mode === 'signup' && !name.trim()) {
+      newErrors.name = '이름을 입력해주세요';
+    }
+    if (!email.trim()) {
+      newErrors.email = '이메일을 입력해주세요';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = '올바른 이메일 형식이 아닙니다';
+    }
+    if (!password.trim()) {
+      newErrors.password = '비밀번호를 입력해주세요';
+    } else if (password.length < 8) {
+      newErrors.password = '비밀번호는 8자 이상이어야 합니다';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) return;
+    if (!validate()) return;
     setIsLoading(true);
     await new Promise(r => setTimeout(r, 1000));
     setIsLoading(false);
@@ -92,7 +112,11 @@ export function AuthPage() {
                 label="이름"
                 placeholder="홍길동"
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={e => {
+                  setName(e.target.value);
+                  setErrors(prev => ({ ...prev, name: '' }));
+                }}
+                error={errors.name}
               />
             )}
             <Input
@@ -101,7 +125,11 @@ export function AuthPage() {
               type="email"
               placeholder="hello@example.com"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={e => {
+                setEmail(e.target.value);
+                setErrors(prev => ({ ...prev, email: '' }));
+              }}
+              error={errors.email}
             />
             <Input
               id="password"
@@ -109,7 +137,11 @@ export function AuthPage() {
               type="password"
               placeholder={mode === 'signup' ? '8자 이상' : '비밀번호 입력'}
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={e => {
+                setPassword(e.target.value);
+                setErrors(prev => ({ ...prev, password: '' }));
+              }}
+              error={errors.password}
             />
 
             <Button
@@ -117,7 +149,6 @@ export function AuthPage() {
               size="lg"
               className="w-full gap-2"
               isLoading={isLoading}
-              disabled={!email.trim() || !password.trim()}
             >
               {mode === 'signup' ? (
                 <>
@@ -136,7 +167,7 @@ export function AuthPage() {
               <>
                 이미 계정이 있으신가요?{' '}
                 <button
-                  onClick={() => setMode('login')}
+                  onClick={() => { setMode('login'); setErrors({}); }}
                   className="font-medium text-blue-400 transition-colors hover:text-blue-300"
                 >
                   로그인
@@ -146,7 +177,7 @@ export function AuthPage() {
               <>
                 계정이 없으신가요?{' '}
                 <button
-                  onClick={() => setMode('signup')}
+                  onClick={() => { setMode('signup'); setErrors({}); }}
                   className="font-medium text-blue-400 transition-colors hover:text-blue-300"
                 >
                   무료 회원가입

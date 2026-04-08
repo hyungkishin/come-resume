@@ -217,7 +217,14 @@ function PreviewSection({ section }: { section: PortfolioSection }) {
 }
 
 export function EditorPage() {
-  const [sections, setSections] = useState<PortfolioSection[]>(DEFAULT_SECTIONS);
+  const [sections, setSections] = useState<PortfolioSection[]>(() => {
+    if (typeof window === 'undefined') return DEFAULT_SECTIONS;
+    try {
+      const saved = localStorage.getItem('foliofy-editor-sections');
+      if (saved) return JSON.parse(saved) as PortfolioSection[];
+    } catch { /* ignore */ }
+    return DEFAULT_SECTIONS;
+  });
   const [activeId, setActiveId] = useState<string | null>('1');
   const [sideTab, setSideTab] = useState('sections');
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -227,11 +234,26 @@ export function EditorPage() {
     if (templateId && TEMPLATE_THEMES[templateId]) {
       return { ...DEFAULT_THEME, templateId, ...TEMPLATE_THEMES[templateId] };
     }
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('foliofy-editor-theme');
+        if (saved) return JSON.parse(saved) as PortfolioTheme;
+      } catch { /* ignore */ }
+    }
     return DEFAULT_THEME;
   });
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [deployState, setDeployState] = useState<'idle' | 'deploying' | 'deployed'>('idle');
+  const [isSaved, setIsSaved] = useState(false);
+
+
+  const handleSave = useCallback(() => {
+    localStorage.setItem('foliofy-editor-sections', JSON.stringify(sections));
+    localStorage.setItem('foliofy-editor-theme', JSON.stringify(theme));
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 3000);
+  }, [sections, theme]);
 
   const activeSection = sections.find(s => s.id === activeId);
 
@@ -408,7 +430,9 @@ export function EditorPage() {
         </div>
 
         <div className="border-t border-zinc-800 p-3">
-          <Button variant="primary" size="sm" className="w-full">저장</Button>
+          <Button variant="primary" size="sm" className="w-full" onClick={handleSave}>
+            {isSaved ? '저장됨 ✓' : '저장'}
+          </Button>
         </div>
       </div>
 

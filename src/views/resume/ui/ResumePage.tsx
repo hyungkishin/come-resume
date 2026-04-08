@@ -18,15 +18,6 @@ interface JdMatchResult {
 }
 
 
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return hash;
-}
-
 function polishLine(line: string): string {
   const trimmed = line.trim();
 
@@ -38,13 +29,13 @@ function polishLine(line: string): string {
 
   const transformations: [RegExp, string][] = [
     [/프론트엔드.*개발.*담당/, 'React/TypeScript 기반 프론트엔드 아키텍처를 설계하고 핵심 기능을 개발하여 사용자 경험 개선에 기여'],
-    [/백엔드.*개발.*담당/, 'Node.js/Express 기반 RESTful API를 설계·구현하여 일 평균 10,000+ 요청을 안정적으로 처리'],
+    [/백엔드.*개발.*담당/, 'Node.js/Express 기반 RESTful API를 설계·구현'],
     [/웹.*개발/, '웹 애플리케이션 전체 개발 라이프사이클을 주도하여 프로젝트를 성공적으로 런칭'],
-    [/유지.*보수/, '레거시 코드 리팩토링 및 테스트 커버리지 60% → 85% 향상으로 배포 안정성 확보'],
+    [/유지.*보수/, '레거시 코드 리팩토링 및 테스트 커버리지 향상으로 배포 안정성 확보'],
     [/개발했습니다/, '설계·개발하여 핵심 비즈니스 지표 개선에 기여했습니다'],
     [/담당했습니다/, '주도적으로 리드하여 팀 생산성 향상에 기여했습니다'],
     [/만들었습니다/, '구축하여 서비스 안정성과 확장성을 확보했습니다'],
-    [/했습니다$/, '하여 측정 가능한 성과를 달성했습니다'],
+    [/했습니다$/, '하여 성과를 달성했습니다'],
     [/참여/, '핵심 역할을 수행'],
     [/다양한.*경험/, '폭넓은 기술 스택을 활용한 실무 경험'],
     [/열정적/, '목표 지향적이며 성과 중심의'],
@@ -58,20 +49,6 @@ function polishLine(line: string): string {
     if (pattern.test(result)) {
       result = result.replace(pattern, replacement);
       break;
-    }
-  }
-
-  if (bullet && !/\d/.test(result) && result.length > 10) {
-    if (!result.includes('%') && !result.includes('건') && !result.includes('명')) {
-      const metrics = [
-        ' (처리 속도 30% 개선)',
-        ' (개발 기간 2주 단축)',
-        ' (사용자 만족도 15% 향상)',
-        ' (코드 품질 점수 20% 향상)',
-        ' (월 활성 사용자 1,000명 달성)',
-      ];
-      const idx = Math.abs(hashString(result)) % metrics.length;
-      result = result + metrics[idx];
     }
   }
 
@@ -242,16 +219,33 @@ export function ResumePage() {
     setIsMatching(true);
     setMatchResult(null);
     await new Promise(r => setTimeout(r, 1500));
-    setMatchResult({
-      matchScore: 73,
-      missingKeywords: ['Kubernetes', 'CI/CD', 'Agile', 'AWS', 'Docker'],
-      matchedKeywords: ['React', 'TypeScript', 'Next.js'],
-      suggestions: [
-        'Docker/Kubernetes 경험을 추가하세요',
-        'CI/CD 파이프라인 구축 경험을 언급하세요',
-        'Agile/Scrum 방법론 적용 사례를 포함하세요',
-      ],
-    });
+
+    const TECH_KEYWORDS = [
+      'React', 'TypeScript', 'JavaScript', 'Python', 'Java', 'Go', 'Rust',
+      'Node.js', 'Next.js', 'Vue', 'Angular', 'Docker', 'Kubernetes', 'AWS',
+      'GCP', 'Azure', 'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'GraphQL',
+      'REST', 'CI/CD', 'Git', 'Agile', 'Scrum', 'Figma', 'Tailwind', 'CSS',
+      'HTML', 'Spring', 'Django', 'Flask', 'Express', 'Prisma', 'Supabase',
+      'Firebase', 'Vercel', 'Linux', 'Terraform',
+    ];
+
+    const jdLower = jdText.toLowerCase();
+    const resumeLower = text.toLowerCase();
+
+    const jdKeywords = TECH_KEYWORDS.filter(kw => jdLower.includes(kw.toLowerCase()));
+    const matchedKeywords = jdKeywords.filter(kw => resumeLower.includes(kw.toLowerCase()));
+    const missingKeywords = jdKeywords.filter(kw => !resumeLower.includes(kw.toLowerCase()));
+
+    const matchScore = jdKeywords.length > 0
+      ? Math.round((matchedKeywords.length / jdKeywords.length) * 100)
+      : 0;
+
+    const suggestions = missingKeywords.slice(0, 5).map(kw => `${kw} 관련 경험이나 프로젝트를 이력서에 추가하세요`);
+    if (suggestions.length === 0) {
+      suggestions.push('JD의 주요 기술 키워드가 이력서에 잘 반영되어 있습니다. STAR 포맷으로 성과를 더욱 구체화해보세요.');
+    }
+
+    setMatchResult({ matchScore, matchedKeywords, missingKeywords, suggestions });
     setIsMatching(false);
   };
 
