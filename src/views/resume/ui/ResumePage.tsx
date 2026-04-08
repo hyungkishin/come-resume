@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { useToastStore } from '@/shared/ui/toast/Toast';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
 import { Tabs } from '@/shared/ui/tabs/Tabs';
@@ -55,6 +56,7 @@ export function ResumePage() {
   const [language, setLanguage] = useState<'ko' | 'en'>('ko');
   const [isPdfLoading, setIsPdfLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const addToast = useToastStore((state) => state.addToast);
 
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -62,7 +64,7 @@ export function ResumePage() {
     setIsPdfLoading(true);
     try {
       const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const pages: string[] = [];
@@ -70,49 +72,22 @@ export function ResumePage() {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
         const lines: string[] = [];
-        let currentLine = '';
-        let prevY: number | null = null;
-        let prevHeight = 0;
-
+        let lastY: number | null = null;
         for (const item of content.items) {
           if (!('str' in item)) continue;
-          const y = item.transform[5];
-          const fontSize = item.height;
-
-          if (prevY !== null) {
-            const yDiff = Math.abs(prevY - y);
-            if (yDiff > 0.5) {
-              lines.push(currentLine.trimEnd());
-              // 큰 간격(폰트 높이의 1.8배 이상) → 섹션 구분으로 빈 줄 추가
-              if (yDiff > prevHeight * 1.8) {
-                lines.push('');
-              }
-              currentLine = '';
-            }
+          const y = 'transform' in item ? (item.transform as number[])[5] : 0;
+          if (lastY !== null && Math.abs(y - lastY) > 2) {
+            lines.push('\n');
           }
-
-          // 같은 줄인데 단어 간격이 있으면 공백 추가
-          if (currentLine && !currentLine.endsWith(' ') && item.str && !item.str.startsWith(' ')) {
-            currentLine += ' ';
-          }
-          currentLine += item.str;
-          prevY = y;
-          prevHeight = fontSize || prevHeight;
-
-          if (item.hasEOL) {
-            lines.push(currentLine.trimEnd());
-            currentLine = '';
-            prevY = null;
-          }
+          lines.push(item.str);
+          lastY = y;
         }
-        if (currentLine.trim()) {
-          lines.push(currentLine.trimEnd());
-        }
-        pages.push(lines.join('\n'));
+        pages.push(lines.join(''));
       }
-      setText(pages.join('\n\n---\n\n'));
+      setText(pages.join('\n\n'));
+      addToast('success', `PDF에서 ${pdf.numPages}페이지 텍스트를 추출했습니다`);
     } catch {
-      alert('PDF 파일을 읽는 중 오류가 발생했습니다.');
+      addToast('error', 'PDF 파일을 읽는 중 오류가 발생했습니다. 다른 형식의 PDF를 시도해주세요.');
     } finally {
       setIsPdfLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

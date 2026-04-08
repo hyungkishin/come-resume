@@ -45,14 +45,14 @@ export function AuthPage() {
     setIsLoading(true);
     await new Promise(r => setTimeout(r, 1000));
     setIsLoading(false);
-    router.push('/dashboard');
+    router.push('/onboarding');
   };
 
   const handleGithub = async () => {
     setIsLoading(true);
     await new Promise(r => setTimeout(r, 1000));
     setIsLoading(false);
-    router.push('/dashboard');
+    router.push('/onboarding');
   };
 
   return (

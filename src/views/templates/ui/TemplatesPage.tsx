@@ -91,20 +91,36 @@ export function TemplatesPage() {
             >
               {/* 프리뷰 */}
               <div
-                className="relative h-40"
+                className="relative h-44 overflow-hidden"
                 style={{
                   background: t.colors.length > 2
                     ? `linear-gradient(135deg, ${t.colors.join(', ')})`
                     : `linear-gradient(135deg, ${t.colors[0]}, ${t.colors[1] || t.colors[0]})`,
                 }}
               >
-                {/* 미리보기 요소 */}
-                <div className="absolute inset-4 flex flex-col justify-end">
-                  <div className="h-3 w-24 rounded bg-white/20" />
-                  <div className="mt-2 h-2 w-32 rounded bg-white/10" />
-                  <div className="mt-3 flex gap-2">
-                    <div className="h-2 w-12 rounded bg-white/10" />
-                    <div className="h-2 w-12 rounded bg-white/10" />
+                {/* 미니 포트폴리오 스켈레톤 */}
+                <div className="absolute inset-3 flex flex-col gap-2 rounded-md bg-black/20 p-3 backdrop-blur-sm">
+                  {/* 헤더 영역 */}
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-full bg-white/30" />
+                    <div className="space-y-1">
+                      <div className="h-2 w-16 rounded bg-white/30" />
+                      <div className="h-1.5 w-12 rounded bg-white/15" />
+                    </div>
+                  </div>
+                  {/* 본문 영역 */}
+                  <div className="h-1.5 w-full rounded bg-white/10" />
+                  <div className="h-1.5 w-3/4 rounded bg-white/10" />
+                  {/* 프로젝트 카드 미니 */}
+                  <div className="mt-auto grid grid-cols-2 gap-1.5">
+                    <div className="rounded bg-white/10 p-1.5">
+                      <div className="mb-1 h-4 rounded bg-white/10" />
+                      <div className="h-1 w-2/3 rounded bg-white/[0.08]" />
+                    </div>
+                    <div className="rounded bg-white/10 p-1.5">
+                      <div className="mb-1 h-4 rounded bg-white/10" />
+                      <div className="h-1 w-1/2 rounded bg-white/[0.08]" />
+                    </div>
                   </div>
                 </div>
                 {selected === t.id && (
