@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
-import { Github, Sparkles, Menu, X } from '@/shared/ui/icons';
+import { Sparkles, Menu, X } from '@/shared/ui/icons';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -60,9 +60,8 @@ export function Header() {
             </Button>
           </Link>
           <Link href="/dashboard" className="hidden md:block">
-            <Button size="sm" className="gap-2">
-              <Github className="h-4 w-4" />
-              GitHub로 시작하기
+            <Button size="sm">
+              무료로 시작하기
             </Button>
           </Link>
           <button
@@ -116,9 +115,8 @@ export function Header() {
             </nav>
             <div className="mt-4 border-t border-zinc-800 pt-4">
               <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                <Button size="sm" className="w-full gap-2">
-                  <Github className="h-4 w-4" />
-                  GitHub로 시작하기
+                <Button size="sm" className="w-full">
+                  무료로 시작하기
                 </Button>
               </Link>
             </div>

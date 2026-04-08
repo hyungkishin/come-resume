@@ -70,14 +70,14 @@ export function HeroSection() {
         >
           <Link href="/dashboard">
             <Button size="lg" className="group gap-2 text-base">
-              <Github className="h-5 w-5" />
-              GitHub로 무료 시작
+              무료로 시작하기
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Button>
           </Link>
-          <Link href="/editor">
-            <Button variant="outline" size="lg" className="text-base">
-              데모 보기
+          <Link href="/dashboard">
+            <Button variant="outline" size="lg" className="gap-2 text-base">
+              <Github className="h-5 w-5" />
+              GitHub로 시작하기
             </Button>
           </Link>
         </motion.div>
