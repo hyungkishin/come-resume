@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
 import { Tabs } from '@/shared/ui/tabs/Tabs';
@@ -54,6 +55,19 @@ const DEFAULT_THEME: PortfolioTheme = {
   fontFamily: 'Geist Sans',
   darkMode: true,
   customCSS: null,
+};
+
+const TEMPLATE_THEMES: Record<string, Partial<PortfolioTheme>> = {
+  'minimal-dark': { primaryColor: '#3b82f6', darkMode: true },
+  'developer-pro': { primaryColor: '#22d3ee', darkMode: true },
+  'creative-gradient': { primaryColor: '#7c3aed', darkMode: true },
+  'clean-white': { primaryColor: '#3b82f6', darkMode: false },
+  'neon-nights': { primaryColor: '#a855f7', darkMode: true },
+  'corporate': { primaryColor: '#0ea5e9', darkMode: true },
+  'portfolio-plus': { primaryColor: '#f97316', darkMode: true },
+  'modern-stack': { primaryColor: '#10b981', darkMode: true },
+  'elegant': { primaryColor: '#d97706', darkMode: true },
+  'starter': { primaryColor: '#6366f1', darkMode: true },
 };
 
 function PreviewSection({ section }: { section: PortfolioSection }) {
@@ -207,7 +221,14 @@ export function EditorPage() {
   const [activeId, setActiveId] = useState<string | null>('1');
   const [sideTab, setSideTab] = useState('sections');
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [theme, setTheme] = useState<PortfolioTheme>(DEFAULT_THEME);
+  const searchParams = useSearchParams();
+  const [theme, setTheme] = useState<PortfolioTheme>(() => {
+    const templateId = searchParams.get('template');
+    if (templateId && TEMPLATE_THEMES[templateId]) {
+      return { ...DEFAULT_THEME, templateId, ...TEMPLATE_THEMES[templateId] };
+    }
+    return DEFAULT_THEME;
+  });
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [deployState, setDeployState] = useState<'idle' | 'deploying' | 'deployed'>('idle');

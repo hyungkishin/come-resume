@@ -153,7 +153,7 @@ export function TemplatesPage() {
               </span>{' '}
               선택됨
             </span>
-            <Link href="/editor">
+            <Link href={`/editor?template=${selected}`}>
               <Button size="sm">이 템플릿 사용하기</Button>
             </Link>
           </div>
