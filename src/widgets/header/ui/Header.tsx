@@ -54,12 +54,12 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="hidden md:block">
+          <Link href="/auth" className="hidden md:block">
             <Button variant="ghost" size="sm">
               로그인
             </Button>
           </Link>
-          <Link href="/dashboard" className="hidden md:block">
+          <Link href="/auth" className="hidden md:block">
             <Button size="sm">
               무료로 시작하기
             </Button>
@@ -114,7 +114,7 @@ export function Header() {
               </Link>
             </nav>
             <div className="mt-4 border-t border-zinc-800 pt-4">
-              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>
                 <Button size="sm" className="w-full">
                   무료로 시작하기
                 </Button>

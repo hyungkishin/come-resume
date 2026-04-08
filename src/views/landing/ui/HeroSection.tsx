@@ -68,13 +68,13 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
         >
-          <Link href="/dashboard">
+          <Link href="/auth">
             <Button size="lg" className="group gap-2 text-base">
               무료로 시작하기
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Button>
           </Link>
-          <Link href="/dashboard">
+          <Link href="/auth">
             <Button variant="outline" size="lg" className="gap-2 text-base">
               <Github className="h-5 w-5" />
               GitHub로 시작하기

@@ -63,7 +63,7 @@ function PricingCard({
         ))}
       </ul>
 
-      <Link href="/dashboard">
+      <Link href="/auth">
         <Button
           variant={highlighted ? 'primary' : 'outline'}
           size="lg"
