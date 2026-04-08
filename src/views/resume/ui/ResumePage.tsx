@@ -64,9 +64,12 @@ export function ResumePage() {
     setIsPdfLoading(true);
     try {
       const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+        'pdfjs-dist/build/pdf.worker.min.mjs',
+        import.meta.url
+      ).toString();
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
       const pages: string[] = [];
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
@@ -87,7 +90,18 @@ export function ResumePage() {
       setText(pages.join('\n\n'));
       addToast('success', `PDF에서 ${pdf.numPages}페이지 텍스트를 추출했습니다`);
     } catch {
-      addToast('error', 'PDF 파일을 읽는 중 오류가 발생했습니다. 다른 형식의 PDF를 시도해주세요.');
+      // Fallback: FileReader로 텍스트 추출 시도
+      try {
+        const text = await file.text();
+        if (text.trim().length > 50) {
+          setText(text);
+          addToast('info', 'PDF에서 텍스트를 추출했습니다 (기본 모드)');
+        } else {
+          addToast('error', '이 PDF에서 텍스트를 추출할 수 없습니다. 텍스트를 직접 붙여넣어 주세요.');
+        }
+      } catch {
+        addToast('error', 'PDF 파일을 읽을 수 없습니다. 텍스트를 직접 붙여넣어 주세요.');
+      }
     } finally {
       setIsPdfLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
