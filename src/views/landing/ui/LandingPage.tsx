@@ -2,6 +2,7 @@
 
 import { HeroSection } from './HeroSection';
 import { FeatureSection } from './FeatureSection';
+import { TestimonialSection } from './TestimonialSection';
 import { PricingSection } from './PricingSection';
 
 export function LandingPage() {
@@ -9,6 +10,7 @@ export function LandingPage() {
     <>
       <HeroSection />
       <FeatureSection />
+      <TestimonialSection />
       <PricingSection />
 
       {/* Footer */}
@@ -18,13 +20,13 @@ export function LandingPage() {
             &copy; 2026 Foliofy. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <a href="#" className="text-sm text-zinc-500 transition-colors hover:text-zinc-300">
+            <a href="/terms" className="text-sm text-zinc-500 transition-colors hover:text-zinc-300">
               이용약관
             </a>
-            <a href="#" className="text-sm text-zinc-500 transition-colors hover:text-zinc-300">
+            <a href="/privacy" className="text-sm text-zinc-500 transition-colors hover:text-zinc-300">
               개인정보처리방침
             </a>
-            <a href="#" className="text-sm text-zinc-500 transition-colors hover:text-zinc-300">
+            <a href="mailto:hello@foliofy.dev" className="text-sm text-zinc-500 transition-colors hover:text-zinc-300">
               문의하기
             </a>
           </div>

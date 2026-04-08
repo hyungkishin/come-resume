@@ -10,6 +10,51 @@ import { cn } from '@/shared/lib/cn';
 import { Sparkles, Copy, Check, FileText, ArrowRight, BarChart3 } from '@/shared/ui/icons';
 import type { ResumeScore, ResumeSuggestion } from '@/shared/types';
 
+interface JdMatchResult {
+  matchScore: number;
+  missingKeywords: string[];
+  matchedKeywords: string[];
+  suggestions: string[];
+}
+
+const DEMO_POLISHED = `## 경력
+
+### 프론트엔드 개발자 | 스타트업 A (2024.01 - 현재)
+- React/TypeScript 기반 B2B SaaS 대시보드를 설계·개발하여 사용자 전환율 23% 향상
+- Webpack → Vite 마이그레이션으로 빌드 시간 65% 단축 (120초 → 42초)
+- 디자인 시스템 구축 및 20+ 재사용 컴포넌트 개발, 개발 생산성 30% 개선
+
+### 풀스택 개발자 | 프리랜서 (2022.06 - 2023.12)
+- Next.js 기반 이커머스 플랫폼 구축, 일 주문량 500건 처리
+- PostgreSQL 쿼리 최적화로 API 응답 시간 40% 개선
+- Stripe 결제 연동 및 주문 관리 시스템 개발
+
+## 기술 스택
+Frontend: React, TypeScript, Next.js, Tailwind CSS, Framer Motion
+Backend: Node.js, Express, PostgreSQL, Redis
+DevOps: Docker, GitHub Actions, Vercel, AWS (S3, CloudFront)`;
+
+function generatePolishedText(original: string): string {
+  const lines = original.split('\n').filter(l => l.trim());
+  if (lines.length >= 5) {
+    return original
+      .split('\n')
+      .map(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return line;
+        if (trimmed.startsWith('#') || trimmed.startsWith('-')) return line;
+        if (trimmed.length < 20) return `${line} (구체적 성과 수치 포함)`;
+        return line
+          .replace(/담당했습니다/g, '주도적으로 설계·개발했습니다')
+          .replace(/만들었습니다/g, '구축하여 성과를 달성했습니다')
+          .replace(/했습니다/g, '하여 기여했습니다')
+          .replace(/개발자입니다/g, '전문 개발자입니다');
+      })
+      .join('\n');
+  }
+  return DEMO_POLISHED;
+}
+
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
@@ -52,7 +97,9 @@ export function ResumePage() {
   const [text, setText] = useState('');
   const [jdText, setJdText] = useState('');
   const [isPolishing, setIsPolishing] = useState(false);
+  const [isMatching, setIsMatching] = useState(false);
   const [result, setResult] = useState<{ polished: string; score: ResumeScore; suggestions: ResumeSuggestion[] } | null>(null);
+  const [matchResult, setMatchResult] = useState<JdMatchResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [language, setLanguage] = useState<'ko' | 'en'>('ko');
 
@@ -61,14 +108,30 @@ export function ResumePage() {
     setIsPolishing(true);
     await new Promise(r => setTimeout(r, 1500));
     setResult({
-      polished: text.split('\n').map(line =>
-        line.trim() ? `${line} → [AI 개선됨]` : line
-      ).join('\n'),
+      polished: generatePolishedText(text),
       score: MOCK_SCORE,
       suggestions: MOCK_SUGGESTIONS,
     });
     setIsPolishing(false);
     setActiveTab('result');
+  };
+
+  const handleMatch = async () => {
+    if (!jdText.trim() || !text.trim()) return;
+    setIsMatching(true);
+    setMatchResult(null);
+    await new Promise(r => setTimeout(r, 1500));
+    setMatchResult({
+      matchScore: 73,
+      missingKeywords: ['Kubernetes', 'CI/CD', 'Agile', 'AWS', 'Docker'],
+      matchedKeywords: ['React', 'TypeScript', 'Next.js'],
+      suggestions: [
+        'Docker/Kubernetes 경험을 추가하세요',
+        'CI/CD 파이프라인 구축 경험을 언급하세요',
+        'Agile/Scrum 방법론 적용 사례를 포함하세요',
+      ],
+    });
+    setIsMatching(false);
   };
 
   const handleCopy = () => {
@@ -235,12 +298,69 @@ export function ResumePage() {
               className="min-h-[200px] w-full bg-transparent px-4 py-4 text-sm leading-relaxed text-zinc-100 placeholder:text-zinc-600 focus:outline-none resize-none"
             />
           </Card>
-          <Button size="md" disabled={!jdText.trim() || !text.trim()} className="gap-2">
+          <Button size="md" onClick={handleMatch} isLoading={isMatching} disabled={!jdText.trim() || !text.trim()} className="gap-2">
             <BarChart3 className="h-4 w-4" />
             매칭 분석
           </Button>
           {!text.trim() && (
             <p className="text-xs text-zinc-500">* 먼저 &quot;이력서 입력&quot; 탭에서 이력서를 입력해주세요</p>
+          )}
+
+          {matchResult && (
+            <motion.div {...fadeUp} transition={{ duration: 0.3 }} className="space-y-4">
+              <Card>
+                <div className="flex items-center gap-6">
+                  <div className="flex flex-col items-center">
+                    <svg className="h-24 w-24" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="40" fill="none" stroke="#27272a" strokeWidth="8" />
+                      <circle
+                        cx="50" cy="50" r="40" fill="none"
+                        stroke={matchResult.matchScore >= 80 ? '#10b981' : matchResult.matchScore >= 60 ? '#f59e0b' : '#ef4444'}
+                        strokeWidth="8" strokeLinecap="round"
+                        strokeDasharray={`${matchResult.matchScore * 2.51} 251`}
+                        transform="rotate(-90 50 50)"
+                      />
+                      <text x="50" y="50" textAnchor="middle" dominantBaseline="central" className="fill-zinc-50 text-2xl font-bold" fontSize="24" fontWeight="bold">
+                        {matchResult.matchScore}
+                      </text>
+                    </svg>
+                    <p className="mt-1 text-xs text-zinc-400">매칭 점수</p>
+                  </div>
+                  <div className="flex-1 space-y-4">
+                    <div>
+                      <p className="mb-2 text-xs font-medium text-zinc-400">매칭된 키워드</p>
+                      <div className="flex flex-wrap gap-2">
+                        {matchResult.matchedKeywords.map(kw => (
+                          <Badge key={kw} variant="green">{kw}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="mb-2 text-xs font-medium text-zinc-400">누락된 키워드</p>
+                      <div className="flex flex-wrap gap-2">
+                        {matchResult.missingKeywords.map(kw => (
+                          <Badge key={kw} variant="red">{kw}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card>
+                <h3 className="mb-3 text-sm font-semibold text-zinc-100">개선 제안</h3>
+                <ol className="space-y-2">
+                  {matchResult.suggestions.map((suggestion, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-zinc-300">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-purple-500/20 text-xs font-medium text-purple-400">
+                        {i + 1}
+                      </span>
+                      {suggestion}
+                    </li>
+                  ))}
+                </ol>
+              </Card>
+            </motion.div>
           )}
         </motion.div>
       )}

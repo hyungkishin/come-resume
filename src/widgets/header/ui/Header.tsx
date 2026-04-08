@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
-import { Github, Sparkles } from '@/shared/ui/icons';
+import { Github, Sparkles, Menu, X } from '@/shared/ui/icons';
 
 export function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -51,19 +54,77 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link href="/dashboard">
+          <Link href="/dashboard" className="hidden md:block">
             <Button variant="ghost" size="sm">
               로그인
             </Button>
           </Link>
-          <Link href="/dashboard">
+          <Link href="/dashboard" className="hidden md:block">
             <Button size="sm" className="gap-2">
               <Github className="h-4 w-4" />
               GitHub로 시작하기
             </Button>
           </Link>
+          <button
+            onClick={() => setMobileMenuOpen(prev => !prev)}
+            className="flex items-center justify-center rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 md:hidden"
+            aria-label="메뉴 열기"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="absolute left-0 right-0 top-full border-b border-zinc-800 bg-zinc-900 px-6 py-4 md:hidden"
+          >
+            <nav className="flex flex-col gap-1">
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="rounded-lg px-3 py-2.5 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+              >
+                대시보드
+              </Link>
+              <Link
+                href="/editor"
+                onClick={() => setMobileMenuOpen(false)}
+                className="rounded-lg px-3 py-2.5 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+              >
+                에디터
+              </Link>
+              <Link
+                href="/resume"
+                onClick={() => setMobileMenuOpen(false)}
+                className="rounded-lg px-3 py-2.5 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+              >
+                이력서
+              </Link>
+              <Link
+                href="/templates"
+                onClick={() => setMobileMenuOpen(false)}
+                className="rounded-lg px-3 py-2.5 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+              >
+                템플릿
+              </Link>
+            </nav>
+            <div className="mt-4 border-t border-zinc-800 pt-4">
+              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                <Button size="sm" className="w-full gap-2">
+                  <Github className="h-4 w-4" />
+                  GitHub로 시작하기
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 }

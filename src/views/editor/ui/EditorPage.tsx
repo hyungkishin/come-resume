@@ -8,10 +8,11 @@ import { cn } from '@/shared/lib/cn';
 import {
   Plus, Eye, Grip, Trash2, Zap, FileText, Code2,
   Briefcase, GraduationCap, Mail, BarChart3, Sparkles,
-  Rocket, ChevronRight, X, Settings, Palette,
+  Rocket, ChevronRight, X, Settings, Palette, Check, ExternalLink,
 } from '@/shared/ui/icons';
 import type { PortfolioSection, SectionType, PortfolioTheme } from '@/shared/types';
 import { Input } from '@/shared/ui/input/Input';
+import { Badge } from '@/shared/ui/badge/Badge';
 
 const SECTION_META: Record<SectionType, { label: string; icon: React.ReactNode }> = {
   hero: { label: '히어로', icon: <Zap className="h-4 w-4" /> },
@@ -30,7 +31,8 @@ const DEFAULT_SECTIONS: PortfolioSection[] = [
   { id: '3', type: 'projects', order: 2, data: { projectIds: [] }, isVisible: true },
   { id: '4', type: 'skills', order: 3, data: { categories: [{ name: 'Frontend', skills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS'] }, { name: 'Backend', skills: ['Node.js', 'PostgreSQL'] }] }, isVisible: true },
   { id: '5', type: 'experience', order: 4, data: { items: [{ company: '스타트업 A', role: 'Frontend Developer', period: '2024.01 - 현재', description: 'React 기반 대시보드 개발' }] }, isVisible: true },
-  { id: '6', type: 'contact', order: 5, data: { email: 'hello@example.com', github: 'username', linkedin: '', website: '' }, isVisible: true },
+  { id: '7', type: 'education', order: 5, data: { items: [{ school: '한국대학교', degree: '컴퓨터공학과', period: '2018.03 - 2022.02', description: '학점 3.9/4.5' }] }, isVisible: true },
+  { id: '6', type: 'contact', order: 6, data: { email: 'hello@example.com', github: 'username', linkedin: '', website: '' }, isVisible: true },
 ];
 
 const DEFAULT_THEME: PortfolioTheme = {
@@ -81,8 +83,38 @@ function PreviewSection({ section }: { section: PortfolioSection }) {
       {section.type === 'contact' && (
         <p className="text-sm text-zinc-400">{(data.email as string) || 'email@example.com'}</p>
       )}
-      {(section.type === 'projects' || section.type === 'education' || section.type === 'custom') && (
-        <p className="text-sm text-zinc-500">{meta.label} 콘텐츠가 여기에 표시됩니다</p>
+      {section.type === 'projects' && (
+        <div className="space-y-2">
+          {((data.items as Array<{ title: string; description: string; technologies: string[]; githubUrl: string }>) || []).map((item, i) => (
+            <div key={i}>
+              <p className="font-medium text-zinc-200">{item.title}</p>
+              <p className="text-xs text-zinc-400">{item.description}</p>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {(item.technologies || []).map(t => (
+                  <span key={t} className="rounded-full bg-zinc-700/50 px-2 py-0.5 text-xs text-zinc-300">{t}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+          {!(data.items as unknown[])?.length && <p className="text-sm text-zinc-500">프로젝트를 추가하세요</p>}
+        </div>
+      )}
+      {section.type === 'education' && (
+        <div className="space-y-2">
+          {((data.items as Array<{ school: string; degree: string; period: string }>) || []).map((item, i) => (
+            <div key={i}>
+              <p className="font-medium text-zinc-200">{item.degree}</p>
+              <p className="text-xs text-zinc-400">{item.school} · {item.period}</p>
+            </div>
+          ))}
+          {!(data.items as unknown[])?.length && <p className="text-sm text-zinc-500">학력을 추가하세요</p>}
+        </div>
+      )}
+      {section.type === 'custom' && (
+        <div>
+          <p className="font-medium text-zinc-200">{(data.title as string) || '커스텀 섹션'}</p>
+          <p className="mt-1 text-sm text-zinc-400">{(data.content as string) || '내용을 입력하세요'}</p>
+        </div>
       )}
     </div>
   );
@@ -95,6 +127,7 @@ export function EditorPage() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [theme, setTheme] = useState<PortfolioTheme>(DEFAULT_THEME);
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+  const [deployState, setDeployState] = useState<'idle' | 'deploying' | 'deployed'>('idle');
 
   const activeSection = sections.find(s => s.id === activeId);
 
@@ -223,12 +256,49 @@ export function EditorPage() {
               <Input label="슬러그" defaultValue="username" />
               <div className="rounded-lg bg-zinc-800/50 p-3">
                 <p className="text-xs text-zinc-400">배포 URL</p>
-                <p className="mt-1 text-sm font-medium text-zinc-200">username.foliofy.dev</p>
+                {deployState === 'deployed' ? (
+                  <a
+                    href="https://username.foliofy.dev"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 flex items-center gap-1 text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    username.foliofy.dev
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : (
+                  <p className="mt-1 text-sm font-medium text-zinc-200">username.foliofy.dev</p>
+                )}
               </div>
-              <Button size="sm" className="w-full gap-2">
-                <Rocket className="h-4 w-4" />
-                배포하기
-              </Button>
+              {deployState === 'deployed' && (
+                <Badge variant="green" className="flex items-center gap-1.5 w-fit">
+                  <Check className="h-3 w-3" />
+                  배포 완료
+                </Badge>
+              )}
+              {deployState === 'deployed' ? (
+                <Button
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={() => setDeployState('idle')}
+                >
+                  <Rocket className="h-4 w-4" />
+                  다시 배포
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  className="w-full gap-2"
+                  disabled={deployState === 'deploying'}
+                  onClick={() => {
+                    setDeployState('deploying');
+                    setTimeout(() => setDeployState('deployed'), 2000);
+                  }}
+                >
+                  <Rocket className="h-4 w-4" />
+                  {deployState === 'deploying' ? '배포 중...' : '배포하기'}
+                </Button>
+              )}
             </div>
           )}
         </div>
