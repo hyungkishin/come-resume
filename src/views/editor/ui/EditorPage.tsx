@@ -27,13 +27,25 @@ const SECTION_META: Record<SectionType, { label: string; icon: React.ReactNode }
 };
 
 const DEFAULT_SECTIONS: PortfolioSection[] = [
-  { id: '1', type: 'hero', order: 0, data: { name: '홍길동', title: 'Frontend Developer', subtitle: '사용자 경험을 만드는 개발자' }, isVisible: true },
-  { id: '2', type: 'about', order: 1, data: { bio: '3년차 프론트엔드 개발자로, React와 TypeScript를 주력으로 사용합니다.' }, isVisible: true },
-  { id: '3', type: 'projects', order: 2, data: { projectIds: [] }, isVisible: true },
-  { id: '4', type: 'skills', order: 3, data: { categories: [{ name: 'Frontend', skills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS'] }, { name: 'Backend', skills: ['Node.js', 'PostgreSQL'] }] }, isVisible: true },
-  { id: '5', type: 'experience', order: 4, data: { items: [{ company: '스타트업 A', role: 'Frontend Developer', period: '2024.01 - 현재', description: 'React 기반 대시보드 개발' }] }, isVisible: true },
-  { id: '7', type: 'education', order: 5, data: { items: [{ school: '한국대학교', degree: '컴퓨터공학과', period: '2018.03 - 2022.02', description: '학점 3.9/4.5' }] }, isVisible: true },
-  { id: '6', type: 'contact', order: 6, data: { email: 'hello@example.com', github: 'username', linkedin: '', website: '' }, isVisible: true },
+  { id: '1', type: 'hero', order: 0, data: { name: '홍길동', title: 'Frontend Developer', subtitle: '사용자 중심의 인터페이스를 설계하고, 성능과 접근성을 모두 챙기는 3년차 프론트엔드 개발자입니다.', avatarUrl: null }, isVisible: true },
+  { id: '2', type: 'about', order: 1, data: { bio: 'React와 TypeScript를 주력으로 사용하며, 디자인 시스템 구축과 성능 최적화에 강점이 있습니다. B2B SaaS 대시보드와 이커머스 플랫폼을 개발한 경험이 있으며, 사용자 경험을 최우선으로 생각합니다. 최근에는 Next.js App Router와 서버 컴포넌트에 깊은 관심을 가지고 있습니다.' }, isVisible: true },
+  { id: '3', type: 'projects', order: 2, data: { items: [
+    { title: 'Foliofy', description: 'GitHub 연동 AI 포트폴리오 빌더. 5분 만에 프로페셔널한 포트폴리오 생성.', technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Supabase'], githubUrl: 'https://github.com/user/foliofy' },
+    { title: 'Dashboard Pro', description: 'B2B SaaS 대시보드. 실시간 데이터 시각화와 팀 협업 기능 제공.', technologies: ['React', 'D3.js', 'PostgreSQL', 'WebSocket'], githubUrl: 'https://github.com/user/dashboard-pro' },
+    { title: 'EcoMarket', description: '친환경 이커머스 플랫폼. 일 주문량 500건 처리, 페이지 로딩 40% 개선.', technologies: ['Next.js', 'Stripe', 'Prisma', 'Redis'], githubUrl: 'https://github.com/user/ecomarket' },
+  ] }, isVisible: true },
+  { id: '4', type: 'skills', order: 3, data: { categories: [
+    { name: 'Frontend', skills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Framer Motion'] },
+    { name: 'Backend', skills: ['Node.js', 'PostgreSQL', 'Redis', 'Prisma'] },
+    { name: 'DevOps', skills: ['Docker', 'GitHub Actions', 'Vercel', 'AWS'] },
+    { name: 'Tools', skills: ['Figma', 'Git', 'Jira', 'Notion'] },
+  ] }, isVisible: true },
+  { id: '5', type: 'experience', order: 4, data: { items: [
+    { company: '테크스타트업 A', role: 'Senior Frontend Developer', period: '2024.01 - 현재', description: 'React/TypeScript 기반 B2B SaaS 대시보드 설계·개발. 디자인 시스템 구축으로 개발 생산성 30% 향상.' },
+    { company: '프리랜서', role: 'Fullstack Developer', period: '2022.06 - 2023.12', description: 'Next.js 기반 이커머스 플랫폼 구축. Stripe 결제 연동 및 주문 관리 시스템 개발.' },
+  ] }, isVisible: true },
+  { id: '7', type: 'education', order: 5, data: { items: [{ school: '한국대학교', degree: '컴퓨터공학과 학사', period: '2018.03 - 2022.02', description: '학점 3.9/4.5 · 소프트웨어 공학 캡스톤 우수상' }] }, isVisible: true },
+  { id: '6', type: 'contact', order: 6, data: { email: 'gildong@example.com', github: 'gildong-dev', linkedin: 'gildong', website: 'https://gildong.dev' }, isVisible: true },
 ];
 
 const DEFAULT_THEME: PortfolioTheme = {
@@ -47,76 +59,145 @@ const DEFAULT_THEME: PortfolioTheme = {
 function PreviewSection({ section }: { section: PortfolioSection }) {
   if (!section.isVisible) return null;
   const data = section.data as Record<string, unknown>;
-  const meta = SECTION_META[section.type];
 
-  return (
-    <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6">
-      <p className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">
-        {meta.label}
-      </p>
-      {section.type === 'hero' && (
-        <div>
-          <h2 className="text-2xl font-bold text-zinc-50">{(data.name as string) || '이름'}</h2>
-          <p className="text-lg text-blue-400">{(data.title as string) || '직함'}</p>
-          <p className="mt-1 text-sm text-zinc-400">{(data.subtitle as string) || '소개'}</p>
+  if (section.type === 'hero') {
+    return (
+      <div className="flex flex-col items-center rounded-xl bg-gradient-to-b from-zinc-900 to-zinc-950 px-8 py-16 text-center">
+        <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-3xl font-bold text-white">
+          {((data.name as string) || 'U').charAt(0)}
         </div>
-      )}
-      {section.type === 'about' && (
+        <h2 className="text-3xl font-bold tracking-tight text-zinc-50">{(data.name as string) || '이름'}</h2>
+        <p className="mt-2 text-lg font-medium text-blue-400">{(data.title as string) || '직함'}</p>
+        <p className="mt-3 max-w-md text-sm leading-relaxed text-zinc-400">{(data.subtitle as string) || '소개를 입력하세요'}</p>
+      </div>
+    );
+  }
+
+  if (section.type === 'about') {
+    return (
+      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-blue-400">About</h3>
         <p className="text-sm leading-relaxed text-zinc-300">{(data.bio as string) || '자기소개를 입력하세요'}</p>
-      )}
-      {section.type === 'skills' && (
-        <div className="flex flex-wrap gap-2">
-          {((data.categories as Array<{ name: string; skills: string[] }>) || []).flatMap(c => c.skills).map(s => (
-            <span key={s} className="rounded-full bg-blue-500/10 px-2.5 py-1 text-xs text-blue-400">{s}</span>
-          ))}
-        </div>
-      )}
-      {section.type === 'experience' && (
-        <div className="space-y-2">
-          {((data.items as Array<{ company: string; role: string; period: string }>) || []).map((item, i) => (
-            <div key={i}>
-              <p className="font-medium text-zinc-200">{item.role}</p>
-              <p className="text-xs text-zinc-400">{item.company} · {item.period}</p>
-            </div>
-          ))}
-        </div>
-      )}
-      {section.type === 'contact' && (
-        <p className="text-sm text-zinc-400">{(data.email as string) || 'email@example.com'}</p>
-      )}
-      {section.type === 'projects' && (
-        <div className="space-y-2">
-          {((data.items as Array<{ title: string; description: string; technologies: string[]; githubUrl: string }>) || []).map((item, i) => (
-            <div key={i}>
-              <p className="font-medium text-zinc-200">{item.title}</p>
-              <p className="text-xs text-zinc-400">{item.description}</p>
-              <div className="mt-1 flex flex-wrap gap-1">
+      </div>
+    );
+  }
+
+  if (section.type === 'projects') {
+    const items = (data.items as Array<{ title: string; description: string; technologies: string[]; githubUrl: string }>) || [];
+    return (
+      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
+        <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-blue-400">Projects</h3>
+        {items.length === 0 && <p className="text-sm text-zinc-500">프로젝트를 추가하세요</p>}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {items.map((item, i) => (
+            <div key={i} className="rounded-lg border border-zinc-800 bg-zinc-800/30 p-4">
+              <p className="font-medium text-zinc-100">{item.title}</p>
+              <p className="mt-1 text-xs leading-relaxed text-zinc-400">{item.description}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
                 {(item.technologies || []).map(t => (
-                  <span key={t} className="rounded-full bg-zinc-700/50 px-2 py-0.5 text-xs text-zinc-300">{t}</span>
+                  <span key={t} className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs text-blue-400">{t}</span>
                 ))}
               </div>
             </div>
           ))}
-          {!(data.items as unknown[])?.length && <p className="text-sm text-zinc-500">프로젝트를 추가하세요</p>}
         </div>
-      )}
-      {section.type === 'education' && (
-        <div className="space-y-2">
-          {((data.items as Array<{ school: string; degree: string; period: string }>) || []).map((item, i) => (
-            <div key={i}>
-              <p className="font-medium text-zinc-200">{item.degree}</p>
-              <p className="text-xs text-zinc-400">{item.school} · {item.period}</p>
+      </div>
+    );
+  }
+
+  if (section.type === 'skills') {
+    const categories = (data.categories as Array<{ name: string; skills: string[] }>) || [];
+    return (
+      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
+        <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-blue-400">Skills</h3>
+        <div className="grid grid-cols-2 gap-4">
+          {categories.map(cat => (
+            <div key={cat.name}>
+              <p className="mb-2 text-xs font-medium text-zinc-300">{cat.name}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {cat.skills.map(s => (
+                  <span key={s} className="rounded-full border border-zinc-700 bg-zinc-800/50 px-2.5 py-1 text-xs text-zinc-300">{s}</span>
+                ))}
+              </div>
             </div>
           ))}
-          {!(data.items as unknown[])?.length && <p className="text-sm text-zinc-500">학력을 추가하세요</p>}
         </div>
-      )}
-      {section.type === 'custom' && (
-        <div>
-          <p className="font-medium text-zinc-200">{(data.title as string) || '커스텀 섹션'}</p>
-          <p className="mt-1 text-sm text-zinc-400">{(data.content as string) || '내용을 입력하세요'}</p>
+      </div>
+    );
+  }
+
+  if (section.type === 'experience') {
+    const items = (data.items as Array<{ company: string; role: string; period: string; description: string }>) || [];
+    return (
+      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
+        <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-blue-400">Experience</h3>
+        <div className="space-y-4">
+          {items.map((item, i) => (
+            <div key={i} className="relative border-l-2 border-zinc-700 pl-4">
+              <div className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-blue-500" />
+              <p className="font-medium text-zinc-100">{item.role}</p>
+              <p className="text-xs text-zinc-400">{item.company} · {item.period}</p>
+              {item.description && <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">{item.description}</p>}
+            </div>
+          ))}
         </div>
-      )}
+      </div>
+    );
+  }
+
+  if (section.type === 'education') {
+    const items = (data.items as Array<{ school: string; degree: string; period: string; description: string }>) || [];
+    return (
+      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
+        <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-blue-400">Education</h3>
+        <div className="space-y-4">
+          {items.map((item, i) => (
+            <div key={i} className="relative border-l-2 border-zinc-700 pl-4">
+              <div className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-blue-500" />
+              <p className="font-medium text-zinc-100">{item.degree}</p>
+              <p className="text-xs text-zinc-400">{item.school} · {item.period}</p>
+              {item.description && <p className="mt-1.5 text-xs text-zinc-400">{item.description}</p>}
+            </div>
+          ))}
+          {!items.length && <p className="text-sm text-zinc-500">학력을 추가하세요</p>}
+        </div>
+      </div>
+    );
+  }
+
+  if (section.type === 'contact') {
+    return (
+      <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8 text-center">
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-blue-400">Contact</h3>
+        <p className="mb-4 text-sm text-zinc-300">함께 일하고 싶으시다면 연락주세요</p>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {(data.email as string) && (
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 text-xs text-zinc-300">
+              <Mail className="h-3 w-3" /> {data.email as string}
+            </span>
+          )}
+          {(data.github as string) && (
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 text-xs text-zinc-300">
+              <Code2 className="h-3 w-3" /> {data.github as string}
+            </span>
+          )}
+          {(data.website as string) && (
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 text-xs text-zinc-300">
+              <ExternalLink className="h-3 w-3" /> 웹사이트
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // custom
+  return (
+    <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 px-8 py-8">
+      <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-blue-400">
+        {(data.title as string) || '커스텀'}
+      </h3>
+      <p className="text-sm leading-relaxed text-zinc-300">{(data.content as string) || '내용을 입력하세요'}</p>
     </div>
   );
 }
