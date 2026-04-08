@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
   const sort = searchParams.get('sort') ?? 'stars';
   const limit = parseInt(searchParams.get('limit') ?? '6', 10);
 
-  let repos = [...MOCK_REPOS];
+  const repos = [...MOCK_REPOS];
 
   if (sort === 'stars') {
     repos.sort((a, b) => b.stars - a.stars);

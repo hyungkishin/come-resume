@@ -12,6 +12,7 @@ export function AuthButton() {
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
           {user.githubAvatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={user.githubAvatarUrl}
               alt={user.username}

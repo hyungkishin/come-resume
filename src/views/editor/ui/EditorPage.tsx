@@ -7,8 +7,8 @@ import { Tabs } from '@/shared/ui/tabs/Tabs';
 import { cn } from '@/shared/lib/cn';
 import {
   Plus, Eye, Grip, Trash2, Zap, FileText, Code2,
-  Briefcase, GraduationCap, Mail, BarChart3, Sparkles,
-  Rocket, ChevronRight, X, Settings, Palette, Check, ExternalLink,
+  Briefcase, GraduationCap, Mail, BarChart3,
+  Rocket, X, Check, ExternalLink,
 } from '@/shared/ui/icons';
 import type { PortfolioSection, SectionType, PortfolioTheme } from '@/shared/types';
 import { Input } from '@/shared/ui/input/Input';
@@ -345,10 +345,289 @@ export function EditorPage() {
                 <Input label="웹사이트" value={(activeSection.data as Record<string, string>).website || ''} onChange={e => updateSectionData(activeSection.id, { website: e.target.value })} />
               </>
             )}
-            {(activeSection.type === 'projects' || activeSection.type === 'skills' || activeSection.type === 'experience' || activeSection.type === 'education' || activeSection.type === 'custom') && (
-              <p className="text-sm text-zinc-500">
-                {SECTION_META[activeSection.type].label} 편집 기능 — 세부 편집기 준비 중
-              </p>
+            {activeSection.type === 'skills' && (() => {
+              const skillData = activeSection.data as { categories?: Array<{ name: string; skills: string[] }> };
+              const categories = skillData.categories ?? [];
+              return (
+                <div className="space-y-4">
+                  {categories.map((cat, ci) => (
+                    <div key={ci} className="rounded-lg border border-zinc-800 p-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          className="flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="카테고리명"
+                          value={cat.name}
+                          onChange={e => {
+                            const next = categories.map((c, i) => i === ci ? { ...c, name: e.target.value } : c);
+                            updateSectionData(activeSection.id, { categories: next });
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            const next = categories.filter((_, i) => i !== ci);
+                            updateSectionData(activeSection.id, { categories: next });
+                          }}
+                          className="text-zinc-600 hover:text-red-400"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {cat.skills.map((skill, si) => (
+                          <span key={si} className="flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-1 text-xs text-blue-400">
+                            {skill}
+                            <button
+                              onClick={() => {
+                                const next = categories.map((c, i) => i === ci ? { ...c, skills: c.skills.filter((_, j) => j !== si) } : c);
+                                updateSectionData(activeSection.id, { categories: next });
+                              }}
+                              className="hover:text-red-400"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                      <input
+                        className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="스킬 입력 후 Enter"
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            const val = (e.target as HTMLInputElement).value.trim();
+                            if (!val) return;
+                            const next = categories.map((c, i) => i === ci ? { ...c, skills: [...c.skills, val] } : c);
+                            updateSectionData(activeSection.id, { categories: next });
+                            (e.target as HTMLInputElement).value = '';
+                          }
+                        }}
+                      />
+                    </div>
+                  ))}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="w-full gap-2"
+                    onClick={() => updateSectionData(activeSection.id, { categories: [...categories, { name: '', skills: [] }] })}
+                  >
+                    <Plus className="h-4 w-4" />
+                    카테고리 추가
+                  </Button>
+                </div>
+              );
+            })()}
+            {activeSection.type === 'experience' && (() => {
+              const expData = activeSection.data as { items?: Array<{ company: string; role: string; period: string; description: string }> };
+              const items = expData.items ?? [];
+              return (
+                <div className="space-y-4">
+                  {items.map((item, idx) => (
+                    <div key={idx} className="rounded-lg border border-zinc-800 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-zinc-400">경력 {idx + 1}</span>
+                        <button
+                          onClick={() => {
+                            const next = items.filter((_, i) => i !== idx);
+                            updateSectionData(activeSection.id, { items: next });
+                          }}
+                          className="text-zinc-600 hover:text-red-400"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <Input label="회사명" value={item.company} onChange={e => {
+                        const next = items.map((it, i) => i === idx ? { ...it, company: e.target.value } : it);
+                        updateSectionData(activeSection.id, { items: next });
+                      }} />
+                      <Input label="직함" value={item.role} onChange={e => {
+                        const next = items.map((it, i) => i === idx ? { ...it, role: e.target.value } : it);
+                        updateSectionData(activeSection.id, { items: next });
+                      }} />
+                      <Input label="기간" value={item.period} placeholder="예: 2024.01 - 현재" onChange={e => {
+                        const next = items.map((it, i) => i === idx ? { ...it, period: e.target.value } : it);
+                        updateSectionData(activeSection.id, { items: next });
+                      }} />
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium text-zinc-300">설명</label>
+                        <textarea
+                          className="min-h-[80px] w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          value={item.description}
+                          onChange={e => {
+                            const next = items.map((it, i) => i === idx ? { ...it, description: e.target.value } : it);
+                            updateSectionData(activeSection.id, { items: next });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="w-full gap-2"
+                    onClick={() => updateSectionData(activeSection.id, { items: [...items, { company: '', role: '', period: '', description: '' }] })}
+                  >
+                    <Plus className="h-4 w-4" />
+                    경력 추가
+                  </Button>
+                </div>
+              );
+            })()}
+            {activeSection.type === 'education' && (() => {
+              const eduData = activeSection.data as { items?: Array<{ school: string; degree: string; period: string; description: string }> };
+              const items = eduData.items ?? [];
+              return (
+                <div className="space-y-4">
+                  {items.map((item, idx) => (
+                    <div key={idx} className="rounded-lg border border-zinc-800 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-zinc-400">학력 {idx + 1}</span>
+                        <button
+                          onClick={() => {
+                            const next = items.filter((_, i) => i !== idx);
+                            updateSectionData(activeSection.id, { items: next });
+                          }}
+                          className="text-zinc-600 hover:text-red-400"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <Input label="학교명" value={item.school} onChange={e => {
+                        const next = items.map((it, i) => i === idx ? { ...it, school: e.target.value } : it);
+                        updateSectionData(activeSection.id, { items: next });
+                      }} />
+                      <Input label="학과/전공" value={item.degree} onChange={e => {
+                        const next = items.map((it, i) => i === idx ? { ...it, degree: e.target.value } : it);
+                        updateSectionData(activeSection.id, { items: next });
+                      }} />
+                      <Input label="기간" value={item.period} placeholder="예: 2018.03 - 2022.02" onChange={e => {
+                        const next = items.map((it, i) => i === idx ? { ...it, period: e.target.value } : it);
+                        updateSectionData(activeSection.id, { items: next });
+                      }} />
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium text-zinc-300">설명</label>
+                        <textarea
+                          className="min-h-[80px] w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          value={item.description}
+                          onChange={e => {
+                            const next = items.map((it, i) => i === idx ? { ...it, description: e.target.value } : it);
+                            updateSectionData(activeSection.id, { items: next });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="w-full gap-2"
+                    onClick={() => updateSectionData(activeSection.id, { items: [...items, { school: '', degree: '', period: '', description: '' }] })}
+                  >
+                    <Plus className="h-4 w-4" />
+                    학력 추가
+                  </Button>
+                </div>
+              );
+            })()}
+            {activeSection.type === 'projects' && (() => {
+              const projData = activeSection.data as { items?: Array<{ title: string; description: string; technologies: string[]; githubUrl: string }> };
+              const items = projData.items ?? [];
+              return (
+                <div className="space-y-4">
+                  {items.map((item, idx) => (
+                    <div key={idx} className="rounded-lg border border-zinc-800 p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-zinc-400">프로젝트 {idx + 1}</span>
+                        <button
+                          onClick={() => {
+                            const next = items.filter((_, i) => i !== idx);
+                            updateSectionData(activeSection.id, { items: next });
+                          }}
+                          className="text-zinc-600 hover:text-red-400"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <Input label="프로젝트명" value={item.title} onChange={e => {
+                        const next = items.map((it, i) => i === idx ? { ...it, title: e.target.value } : it);
+                        updateSectionData(activeSection.id, { items: next });
+                      }} />
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium text-zinc-300">설명</label>
+                        <textarea
+                          className="min-h-[80px] w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          value={item.description}
+                          onChange={e => {
+                            const next = items.map((it, i) => i === idx ? { ...it, description: e.target.value } : it);
+                            updateSectionData(activeSection.id, { items: next });
+                          }}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium text-zinc-300">기술 스택</label>
+                        <div className="flex flex-wrap gap-1.5 mb-1">
+                          {(item.technologies || []).map((tech, ti) => (
+                            <span key={ti} className="flex items-center gap-1 rounded-full bg-zinc-700/50 px-2.5 py-1 text-xs text-zinc-300">
+                              {tech}
+                              <button
+                                onClick={() => {
+                                  const next = items.map((it, i) => i === idx ? { ...it, technologies: it.technologies.filter((_, j) => j !== ti) } : it);
+                                  updateSectionData(activeSection.id, { items: next });
+                                }}
+                                className="hover:text-red-400"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                        <input
+                          className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="기술 입력 후 Enter"
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              const val = (e.target as HTMLInputElement).value.trim();
+                              if (!val) return;
+                              const next = items.map((it, i) => i === idx ? { ...it, technologies: [...(it.technologies || []), val] } : it);
+                              updateSectionData(activeSection.id, { items: next });
+                              (e.target as HTMLInputElement).value = '';
+                            }
+                          }}
+                        />
+                      </div>
+                      <Input label="GitHub URL" value={item.githubUrl} placeholder="https://github.com/..." onChange={e => {
+                        const next = items.map((it, i) => i === idx ? { ...it, githubUrl: e.target.value } : it);
+                        updateSectionData(activeSection.id, { items: next });
+                      }} />
+                    </div>
+                  ))}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="w-full gap-2"
+                    onClick={() => updateSectionData(activeSection.id, { items: [...items, { title: '', description: '', technologies: [], githubUrl: '' }] })}
+                  >
+                    <Plus className="h-4 w-4" />
+                    프로젝트 추가
+                  </Button>
+                </div>
+              );
+            })()}
+            {activeSection.type === 'custom' && (
+              <>
+                <Input
+                  label="제목"
+                  value={(activeSection.data as Record<string, string>).title || ''}
+                  onChange={e => updateSectionData(activeSection.id, { title: e.target.value })}
+                />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-zinc-300">내용</label>
+                  <textarea
+                    className="min-h-[120px] w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={(activeSection.data as Record<string, string>).content || ''}
+                    onChange={e => updateSectionData(activeSection.id, { content: e.target.value })}
+                    placeholder="내용을 입력하세요"
+                  />
+                </div>
+              </>
             )}
           </div>
         </div>

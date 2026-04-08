@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Search } from '@/shared/ui/icons';
+import { Star } from '@/shared/ui/icons';
 import { Input } from '@/shared/ui/input/Input';
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Button } from '@/shared/ui/button/Button';

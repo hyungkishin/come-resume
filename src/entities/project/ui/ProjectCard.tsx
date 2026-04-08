@@ -17,6 +17,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
     <Card hover className="flex flex-col gap-0 p-0 overflow-hidden">
       <div className="relative h-40 bg-zinc-800 flex items-center justify-center">
         {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={imageUrl}
             alt={title}

@@ -2,13 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
 import { Card } from '@/shared/ui/card/Card';
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Plus, FileText, Eye, Globe, Sparkles, ArrowRight, Settings } from '@/shared/ui/icons';
-import { cn } from '@/shared/lib/cn';
 import type { Portfolio } from '@/shared/types';
 
 const fadeUp = {
