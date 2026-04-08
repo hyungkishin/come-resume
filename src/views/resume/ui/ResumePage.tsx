@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/shared/ui/button/Button';
 import { Tabs } from '@/shared/ui/tabs/Tabs';
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Card } from '@/shared/ui/card/Card';
 import { cn } from '@/shared/lib/cn';
-import { Sparkles, Copy, Check, FileText, ArrowRight, BarChart3 } from '@/shared/ui/icons';
+import { Sparkles, Copy, Check, FileText, ArrowRight, BarChart3, Download } from '@/shared/ui/icons';
 import type { ResumeScore, ResumeSuggestion } from '@/shared/types';
 
 interface JdMatchResult {
@@ -194,6 +194,35 @@ export function ResumePage() {
   const [matchResult, setMatchResult] = useState<JdMatchResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [language, setLanguage] = useState<'ko' | 'en'>('ko');
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || file.type !== 'application/pdf') return;
+    setIsPdfLoading(true);
+    try {
+      const pdfjsLib = await import('pdfjs-dist');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pages: string[] = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items
+          .map((item) => ('str' in item ? item.str : ''))
+          .join(' ');
+        pages.push(pageText);
+      }
+      setText(pages.join('\n\n'));
+    } catch {
+      alert('PDF 파일을 읽는 중 오류가 발생했습니다.');
+    } finally {
+      setIsPdfLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handlePolish = async () => {
     if (!text.trim()) return;
@@ -287,9 +316,21 @@ export function ResumePage() {
             />
           </Card>
           <div className="mt-4 flex items-center justify-between">
-            <Button variant="outline" size="sm" disabled>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
+              onChange={handlePdfUpload}
+              className="hidden"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              isLoading={isPdfLoading}
+              onClick={() => fileInputRef.current?.click()}
+            >
               <FileText className="mr-1.5 h-3.5 w-3.5" />
-              PDF 업로드 (준비 중)
+              {isPdfLoading ? 'PDF 읽는 중...' : 'PDF 업로드'}
             </Button>
             <Button size="md" onClick={handlePolish} isLoading={isPolishing} disabled={!text.trim()} className="gap-2">
               <Sparkles className="h-4 w-4" />
