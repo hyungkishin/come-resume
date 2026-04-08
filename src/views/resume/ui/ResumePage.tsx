@@ -7,7 +7,7 @@ import { Tabs } from '@/shared/ui/tabs/Tabs';
 import { Badge } from '@/shared/ui/badge/Badge';
 import { Card } from '@/shared/ui/card/Card';
 import { cn } from '@/shared/lib/cn';
-import { Sparkles, Copy, Check, FileText, ArrowRight, BarChart3, Download } from '@/shared/ui/icons';
+import { Sparkles, Copy, Check, FileText, ArrowRight, BarChart3 } from '@/shared/ui/icons';
 import type { ResumeScore, ResumeSuggestion } from '@/shared/types';
 
 interface JdMatchResult {
