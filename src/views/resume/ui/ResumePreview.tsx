@@ -1,0 +1,176 @@
+'use client';
+
+interface ResumePreviewProps {
+  content: string;
+  name?: string;
+  title?: string;
+  email?: string;
+}
+
+type Section = { type: 'h2' | 'h3' | 'list' | 'p'; content: string };
+
+function parseContent(content: string): Section[] {
+  const lines = content.split('\n');
+  const sections: Section[] = [];
+  let currentList: string[] = [];
+
+  const flushList = () => {
+    if (currentList.length > 0) {
+      sections.push({ type: 'list', content: currentList.join('\n') });
+      currentList = [];
+    }
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) { flushList(); continue; }
+    if (trimmed.startsWith('## ')) { flushList(); sections.push({ type: 'h2', content: trimmed.slice(3) }); }
+    else if (trimmed.startsWith('### ')) { flushList(); sections.push({ type: 'h3', content: trimmed.slice(4) }); }
+    else if (trimmed.startsWith('# ')) { flushList(); }
+    else if (trimmed.startsWith('- ') || trimmed.startsWith('• ') || trimmed.startsWith('· ')) {
+      currentList.push(trimmed.slice(2));
+    }
+    else { flushList(); sections.push({ type: 'p', content: trimmed }); }
+  }
+  flushList();
+  return sections;
+}
+
+export function ResumePreview({ content, name, title, email }: ResumePreviewProps) {
+  const sections = parseContent(content);
+
+  return (
+    <div
+      id="resume-print-area"
+      style={{
+        fontFamily: "'Pretendard', 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, sans-serif",
+        color: '#1a1a1a',
+        lineHeight: 1.65,
+        maxWidth: '100%',
+      }}
+    >
+      {/* 헤더 */}
+      {(name || title || email) && (
+        <div style={{ marginBottom: '28px', paddingBottom: '20px', borderBottom: '2px solid #111' }}>
+          {name && (
+            <h1 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.3px', margin: 0, color: '#111' }}>
+              {name}
+            </h1>
+          )}
+          {title && (
+            <p style={{ fontSize: '15px', color: '#2563eb', fontWeight: 500, margin: '6px 0 0' }}>
+              {title}
+            </p>
+          )}
+          {email && (
+            <p style={{ fontSize: '12px', color: '#666', margin: '8px 0 0', letterSpacing: '0.3px' }}>
+              {email}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* 본문 */}
+      {sections.map((section, i) => {
+        if (section.type === 'h2') {
+          return (
+            <div
+              key={i}
+              style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '2.5px',
+                color: '#2563eb',
+                borderBottom: '1px solid #e5e7eb',
+                paddingBottom: '6px',
+                marginTop: i === 0 ? '0' : '24px',
+                marginBottom: '12px',
+              }}
+            >
+              {section.content}
+            </div>
+          );
+        }
+
+        if (section.type === 'h3') {
+          return (
+            <div key={i} style={{ marginTop: '14px', marginBottom: '6px' }}>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#1a1a1a' }}>
+                {section.content}
+              </span>
+            </div>
+          );
+        }
+
+        if (section.type === 'list') {
+          return (
+            <ul
+              key={i}
+              style={{
+                paddingLeft: '18px',
+                margin: '6px 0 10px',
+                listStyleType: 'none',
+              }}
+            >
+              {section.content.split('\n').map((item, j) => (
+                <li
+                  key={j}
+                  style={{
+                    fontSize: '13px',
+                    margin: '4px 0',
+                    paddingLeft: '12px',
+                    position: 'relative',
+                    color: '#374151',
+                    lineHeight: 1.7,
+                  }}
+                >
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: '10px',
+                      width: '4px',
+                      height: '4px',
+                      borderRadius: '50%',
+                      backgroundColor: '#2563eb',
+                    }}
+                  />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          );
+        }
+
+        return (
+          <p
+            key={i}
+            style={{
+              margin: '6px 0',
+              fontSize: '13px',
+              color: '#4b5563',
+              lineHeight: 1.7,
+            }}
+          >
+            {section.content}
+          </p>
+        );
+      })}
+
+      {/* 푸터 */}
+      <div
+        style={{
+          marginTop: '32px',
+          paddingTop: '12px',
+          borderTop: '1px solid #e5e7eb',
+          textAlign: 'center',
+        }}
+      >
+        <p style={{ fontSize: '9px', color: '#9ca3af', letterSpacing: '0.5px' }}>
+          Generated by Foliofy
+        </p>
+      </div>
+    </div>
+  );
+}
