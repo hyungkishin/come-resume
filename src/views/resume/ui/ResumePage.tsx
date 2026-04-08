@@ -180,19 +180,55 @@ export function ResumePage() {
     setIsPdfLoading(true);
     try {
       const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const pages: string[] = [];
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
-        const pageText = content.items
-          .map((item) => ('str' in item ? item.str : ''))
-          .join(' ');
-        pages.push(pageText);
+        const lines: string[] = [];
+        let currentLine = '';
+        let prevY: number | null = null;
+        let prevHeight = 0;
+
+        for (const item of content.items) {
+          if (!('str' in item)) continue;
+          const y = item.transform[5];
+          const fontSize = item.height;
+
+          if (prevY !== null) {
+            const yDiff = Math.abs(prevY - y);
+            if (yDiff > 0.5) {
+              lines.push(currentLine.trimEnd());
+              // 큰 간격(폰트 높이의 1.8배 이상) → 섹션 구분으로 빈 줄 추가
+              if (yDiff > prevHeight * 1.8) {
+                lines.push('');
+              }
+              currentLine = '';
+            }
+          }
+
+          // 같은 줄인데 단어 간격이 있으면 공백 추가
+          if (currentLine && !currentLine.endsWith(' ') && item.str && !item.str.startsWith(' ')) {
+            currentLine += ' ';
+          }
+          currentLine += item.str;
+          prevY = y;
+          prevHeight = fontSize || prevHeight;
+
+          if (item.hasEOL) {
+            lines.push(currentLine.trimEnd());
+            currentLine = '';
+            prevY = null;
+          }
+        }
+        if (currentLine.trim()) {
+          lines.push(currentLine.trimEnd());
+        }
+        pages.push(lines.join('\n'));
       }
-      setText(pages.join('\n\n'));
+      setText(pages.join('\n\n---\n\n'));
     } catch {
       alert('PDF 파일을 읽는 중 오류가 발생했습니다.');
     } finally {
