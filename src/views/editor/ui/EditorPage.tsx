@@ -13,6 +13,7 @@ import {
 import type { PortfolioSection, SectionType, PortfolioTheme } from '@/shared/types';
 import { Input } from '@/shared/ui/input/Input';
 import { Badge } from '@/shared/ui/badge/Badge';
+import { PortfolioPreview } from './PortfolioPreview';
 
 const SECTION_META: Record<SectionType, { label: string; icon: React.ReactNode }> = {
   hero: { label: '히어로', icon: <Zap className="h-4 w-4" /> },
@@ -127,6 +128,7 @@ export function EditorPage() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [theme, setTheme] = useState<PortfolioTheme>(DEFAULT_THEME);
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [deployState, setDeployState] = useState<'idle' | 'deploying' | 'deployed'>('idle');
 
   const activeSection = sections.find(s => s.id === activeId);
@@ -641,7 +643,7 @@ export function EditorPage() {
             activeTab={viewMode}
             onTabChange={(id) => setViewMode(id as 'desktop' | 'mobile')}
           />
-          <Button variant="ghost" size="sm" className="gap-1.5">
+          <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => setPreviewOpen(true)}>
             <Eye className="h-3.5 w-3.5" />
             전체 미리보기
           </Button>
@@ -692,6 +694,13 @@ export function EditorPage() {
           </motion.div>
         </div>
       )}
+
+      <PortfolioPreview
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        sections={sections}
+        theme={theme}
+      />
     </div>
   );
 }
